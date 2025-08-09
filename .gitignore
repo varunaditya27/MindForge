@@ -34,3 +34,15 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# copilot
+.github/
+
+# misc
+idea_arena_workflow.md
+RVCE_LOGO/
+
+# python
+*.pyc
+__pycache__/
+venv/
