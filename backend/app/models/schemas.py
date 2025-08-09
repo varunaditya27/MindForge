@@ -1,9 +1,11 @@
 from pydantic import BaseModel, Field
 from typing import Optional
 
+_FIREBASE_UID_DESC = "Firebase user ID"
+
 class IdeaSubmission(BaseModel):
     """Model for idea submission request"""
-    uid: str = Field(..., description="Firebase user ID")
+    uid: str = Field(..., description=_FIREBASE_UID_DESC)
     name: str = Field(..., min_length=1, max_length=100, description="User's full name")
     branch: str = Field(..., min_length=1, max_length=200, description="Academic branch/department")
     rollNumber: str = Field(..., min_length=1, max_length=20, description="Student roll number")
@@ -20,7 +22,7 @@ class EvaluationResponse(BaseModel):
 
 class LeaderboardEntry(BaseModel):
     """Model for leaderboard entry"""
-    uid: str = Field(..., description="Firebase user ID")
+    uid: str = Field(..., description=_FIREBASE_UID_DESC)
     name: str = Field(..., description="User's full name")
     branch: str = Field(..., description="Academic branch/department")
     score: int = Field(..., ge=0, le=40, description="Total score")
@@ -36,3 +38,15 @@ class HealthResponse(BaseModel):
     status: str = Field(..., description="Service health status")
     message: str = Field(..., description="Health check message")
     timestamp: str = Field(..., description="Response timestamp")
+
+
+class UserProfile(BaseModel):
+    """User profile stored in Firestore"""
+    uid: str = Field(..., description=_FIREBASE_UID_DESC)
+    name: str = Field(..., min_length=1, max_length=100)
+    email: Optional[str] = Field(None, max_length=200)
+    photoURL: Optional[str] = Field(None)
+    branch: str = Field(..., min_length=1, max_length=200)
+    rollNumber: str = Field(..., min_length=1, max_length=20)
+    createdAt: Optional[str] = Field(None, description="ISO timestamp when created")
+    updatedAt: Optional[str] = Field(None, description="ISO timestamp when updated")
