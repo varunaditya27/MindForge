@@ -1,15 +1,23 @@
-// Local storage keys
-const KEYS = {
+// Base keys; we namespace them per user using `${base}:${userKey}`
+const BASE_KEYS = {
   FEEDBACK: 'ideaArenaFeedback',
   SCORES: 'ideaArenaScores',
   USER_PROFILE: 'ideaArenaUserProfile',
   SUBMISSION_TIME: 'ideaArenaSubmissionTime'
 };
 
-export const saveFeedback = (feedback) => {
+const normalizeKey = (userKey) => {
+  if (!userKey) return 'anonymous';
+  // Use email as requested; fall back to uid or raw string
+  return String(userKey).trim().toLowerCase();
+};
+
+const k = (base, userKey) => `${base}:${normalizeKey(userKey)}`;
+
+export const saveFeedback = (feedback, userKey) => {
   try {
-    localStorage.setItem(KEYS.FEEDBACK, JSON.stringify(feedback));
-    localStorage.setItem(KEYS.SUBMISSION_TIME, new Date().toISOString());
+  localStorage.setItem(k(BASE_KEYS.FEEDBACK, userKey), JSON.stringify(feedback));
+  localStorage.setItem(k(BASE_KEYS.SUBMISSION_TIME, userKey), new Date().toISOString());
     return true;
   } catch (error) {
     console.error('Error saving feedback to localStorage:', error);
@@ -17,9 +25,9 @@ export const saveFeedback = (feedback) => {
   }
 };
 
-export const getFeedback = () => {
+export const getFeedback = (userKey) => {
   try {
-    const feedback = localStorage.getItem(KEYS.FEEDBACK);
+  const feedback = localStorage.getItem(k(BASE_KEYS.FEEDBACK, userKey));
     return feedback ? JSON.parse(feedback) : null;
   } catch (error) {
     console.error('Error getting feedback from localStorage:', error);
@@ -27,9 +35,9 @@ export const getFeedback = () => {
   }
 };
 
-export const saveScores = (scores) => {
+export const saveScores = (scores, userKey) => {
   try {
-    localStorage.setItem(KEYS.SCORES, JSON.stringify(scores));
+  localStorage.setItem(k(BASE_KEYS.SCORES, userKey), JSON.stringify(scores));
     return true;
   } catch (error) {
     console.error('Error saving scores to localStorage:', error);
@@ -37,9 +45,9 @@ export const saveScores = (scores) => {
   }
 };
 
-export const getScores = () => {
+export const getScores = (userKey) => {
   try {
-    const scores = localStorage.getItem(KEYS.SCORES);
+  const scores = localStorage.getItem(k(BASE_KEYS.SCORES, userKey));
     return scores ? JSON.parse(scores) : null;
   } catch (error) {
     console.error('Error getting scores from localStorage:', error);
@@ -47,9 +55,10 @@ export const getScores = () => {
   }
 };
 
-export const saveUserProfile = (profile) => {
+export const saveUserProfile = (profile, userKey) => {
   try {
-    localStorage.setItem(KEYS.USER_PROFILE, JSON.stringify(profile));
+  const key = userKey || profile?.email || profile?.uid;
+  localStorage.setItem(k(BASE_KEYS.USER_PROFILE, key), JSON.stringify(profile));
     return true;
   } catch (error) {
     console.error('Error saving user profile to localStorage:', error);
@@ -57,9 +66,9 @@ export const saveUserProfile = (profile) => {
   }
 };
 
-export const getUserProfile = () => {
+export const getUserProfile = (userKey) => {
   try {
-    const profile = localStorage.getItem(KEYS.USER_PROFILE);
+  const profile = localStorage.getItem(k(BASE_KEYS.USER_PROFILE, userKey));
     return profile ? JSON.parse(profile) : null;
   } catch (error) {
     console.error('Error getting user profile from localStorage:', error);
@@ -68,22 +77,18 @@ export const getUserProfile = () => {
 };
 
 export const clearAllData = () => {
-  try {
-    Object.values(KEYS).forEach(key => {
-      localStorage.removeItem(key);
-    });
-    return true;
-  } catch (error) {
-    console.error('Error clearing localStorage:', error);
-    return false;
-  }
+  // Dangerous global clear across users is avoided intentionally. Use clearUserData.
+  return true;
 };
 
-export const getSubmissionTime = () => {
-  try {
-    return localStorage.getItem(KEYS.SUBMISSION_TIME);
-  } catch (error) {
-    console.error('Error getting submission time from localStorage:', error);
-    return null;
-  }
+export const clearUserData = (userKey) => {
+  localStorage.removeItem(k(BASE_KEYS.FEEDBACK, userKey));
+  localStorage.removeItem(k(BASE_KEYS.SCORES, userKey));
+  localStorage.removeItem(k(BASE_KEYS.USER_PROFILE, userKey));
+  localStorage.removeItem(k(BASE_KEYS.SUBMISSION_TIME, userKey));
+  return true;
+};
+
+export const getSubmissionTime = (userKey) => {
+  return localStorage.getItem(k(BASE_KEYS.SUBMISSION_TIME, userKey));
 };
