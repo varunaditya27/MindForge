@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Brain, TrendingUp, Zap, Target, Star, MessageSquare } from 'lucide-react';
+import { Brain, TrendingUp, Zap, Target, Star, MessageSquare, Users, Award } from 'lucide-react';
 
 const FeedbackCard = ({ feedback, scores }) => {
   if (!feedback || !scores) {
@@ -8,65 +8,43 @@ const FeedbackCard = ({ feedback, scores }) => {
   }
 
   const criteria = [
-    {
-      key: 'feasibility',
-      icon: Target,
-      title: 'Feasibility',
-      description: 'How realistic and achievable is your idea?',
-      color: 'text-green-400',
-      bgColor: 'bg-green-500/20'
-    },
-    {
-      key: 'originality',
-      icon: Star,
-      title: 'Originality',
-      description: 'How unique and innovative is your concept?',
-      color: 'text-purple-400',
-      bgColor: 'bg-purple-500/20'
-    },
-    {
-      key: 'scalability',
-      icon: TrendingUp,
-      title: 'Scalability',
-      description: 'Can your idea grow and expand effectively?',
-      color: 'text-blue-400',
-      bgColor: 'bg-blue-500/20'
-    },
-    {
-      key: 'impact',
-      icon: Zap,
-      title: 'Impact',
-      description: 'What positive change will your idea create?',
-      color: 'text-orange-400',
-      bgColor: 'bg-orange-500/20'
-    }
+    { key: 'problemClarity', icon: MessageSquare, title: 'Problem Clarity', description: 'Clarity and specificity of problem', color: 'text-teal-400', bgColor: 'bg-teal-500/20' },
+    { key: 'originality', icon: Star, title: 'Originality', description: 'Novelty and differentiation', color: 'text-purple-400', bgColor: 'bg-purple-500/20' },
+    { key: 'feasibility', icon: Target, title: 'Feasibility', description: 'Technical and practical feasibility', color: 'text-green-400', bgColor: 'bg-green-500/20' },
+    { key: 'technicalComplexity', icon: Brain, title: 'Technical Complexity', description: 'Depth of technical approach', color: 'text-sky-400', bgColor: 'bg-sky-500/20' },
+    { key: 'scalability', icon: TrendingUp, title: 'Scalability', description: 'Growth potential and scale', color: 'text-blue-400', bgColor: 'bg-blue-500/20' },
+    { key: 'marketSize', icon: Users, title: 'Market Size', description: 'Size and reach of target market', color: 'text-emerald-400', bgColor: 'bg-emerald-500/20' },
+    { key: 'businessModel', icon: Award, title: 'Business Model', description: 'Clarity and viability of monetization', color: 'text-fuchsia-400', bgColor: 'bg-fuchsia-500/20' },
+    { key: 'impact', icon: Zap, title: 'Impact', description: 'Expected user/societal impact', color: 'text-orange-400', bgColor: 'bg-orange-500/20' },
+    { key: 'executionPlan', icon: TrendingUp, title: 'Execution Plan', description: 'Roadmap and MVP readiness', color: 'text-indigo-400', bgColor: 'bg-indigo-500/20' },
+    { key: 'riskMitigation', icon: Target, title: 'Risk Mitigation', description: 'Awareness and mitigation of risks', color: 'text-rose-400', bgColor: 'bg-rose-500/20' },
   ];
 
   const getScoreColor = (score) => {
-    if (score >= 8) return 'text-green-400';
-    if (score >= 6) return 'text-yellow-400';
-    if (score >= 4) return 'text-orange-400';
+    if (score >= 85) return 'text-green-400';
+    if (score >= 70) return 'text-yellow-400';
+    if (score >= 55) return 'text-orange-400';
     return 'text-red-400';
   };
 
   const getScoreBgColor = (score) => {
-    if (score >= 8) return 'bg-green-500/20';
-    if (score >= 6) return 'bg-yellow-500/20';
-    if (score >= 4) return 'bg-orange-500/20';
+    if (score >= 85) return 'bg-green-500/20';
+    if (score >= 70) return 'bg-yellow-500/20';
+    if (score >= 55) return 'bg-orange-500/20';
     return 'bg-red-500/20';
   };
 
   const getOverallLabel = (total) => {
-    if (total >= 32) return 'Excellent';
-    if (total >= 24) return 'Very Good';
-    if (total >= 16) return 'Good';
+    if (total >= 85) return 'Excellent';
+    if (total >= 70) return 'Very Good';
+    if (total >= 55) return 'Good';
     return 'Needs Improvement';
   };
 
   const barGradient = (score) => {
-    if (score >= 8) return 'from-green-500 to-green-400';
-    if (score >= 6) return 'from-yellow-500 to-yellow-400';
-    if (score >= 4) return 'from-orange-500 to-orange-400';
+    if (score >= 85) return 'from-green-500 to-green-400';
+    if (score >= 70) return 'from-yellow-500 to-yellow-400';
+    if (score >= 55) return 'from-orange-500 to-orange-400';
     return 'from-red-500 to-red-400';
   };
 
@@ -95,7 +73,7 @@ const FeedbackCard = ({ feedback, scores }) => {
               {scores.totalScore}
             </div>
             <div className="text-gray-400 text-sm">
-              out of 40 points
+              out of 100 points
             </div>
             <div className={`inline-block px-4 py-2 rounded-full mt-4 ${getScoreBgColor(scores.totalScore)}`}>
               <span className={`font-medium ${getScoreColor(scores.totalScore)}`}>
@@ -128,9 +106,7 @@ const FeedbackCard = ({ feedback, scores }) => {
                     <div className={`text-3xl font-bold ${getScoreColor(score)}`}>
                       {score}
                     </div>
-                    <div className="text-gray-500 text-sm">
-                      / 10
-                    </div>
+                    <div className="text-gray-500 text-sm">/ 10</div>
                   </div>
                 </div>
               );
@@ -162,7 +138,7 @@ const FeedbackCard = ({ feedback, scores }) => {
             <div className="space-y-4">
               {criteria.map((criterion) => {
                 const score = scores[criterion.key];
-                const percentage = (score / 10) * 100;
+                const percentage = Math.max(0, Math.min(100, score));
                 
                 return (
                   <div key={criterion.key} className="flex items-center space-x-4">
@@ -177,7 +153,7 @@ const FeedbackCard = ({ feedback, scores }) => {
                         ></div>
                       </div>
                     </div>
-                    <div className={`w-8 text-sm font-medium ${getScoreColor(score)}`}>
+                    <div className={`w-10 text-sm font-medium ${getScoreColor(score)}`}>
                       {score}
                     </div>
                   </div>
@@ -198,10 +174,16 @@ FeedbackCard.propTypes = {
     feedback: PropTypes.string,
   }),
   scores: PropTypes.shape({
-    feasibility: PropTypes.number,
+    problemClarity: PropTypes.number,
     originality: PropTypes.number,
+    feasibility: PropTypes.number,
+    technicalComplexity: PropTypes.number,
     scalability: PropTypes.number,
+    marketSize: PropTypes.number,
+    businessModel: PropTypes.number,
     impact: PropTypes.number,
+    executionPlan: PropTypes.number,
+    riskMitigation: PropTypes.number,
     totalScore: PropTypes.number,
   }),
 };
