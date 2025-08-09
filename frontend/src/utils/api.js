@@ -54,6 +54,34 @@ export const getLeaderboard = async () => {
   }
 };
 
+export const upsertUserProfile = async (profile) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/users/profile`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(profile),
+    });
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const data = await response.json();
+    return { success: true, data, error: null };
+  } catch (error) {
+    console.error('Error upserting profile:', error);
+    return { success: false, data: null, error: error.message };
+  }
+};
+
+export const getUserProfileApi = async (uid) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/users/profile/${uid}`);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const data = await response.json();
+    return { success: true, data, error: null };
+  } catch (error) {
+    console.error('Error fetching profile:', error);
+    return { success: false, data: null, error: error.message };
+  }
+};
+
 export const pingBackend = async () => {
   try {
     const response = await fetch(`${API_BASE_URL}/health`);
