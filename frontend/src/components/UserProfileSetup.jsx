@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import { User, GraduationCap, Hash, ArrowRight } from 'lucide-react';
 import { saveUserProfile } from '../utils/storage';
 
@@ -54,7 +55,7 @@ const UserProfileSetup = ({ user, onProfileComplete }) => {
       createdAt: new Date().toISOString()
     };
 
-    const saved = saveUserProfile(profile);
+  const saved = saveUserProfile(profile, profile.email || profile.uid);
     if (saved) {
       onProfileComplete(profile);
     } else {
@@ -171,6 +172,16 @@ const UserProfileSetup = ({ user, onProfileComplete }) => {
       </div>
     </div>
   );
+};
+
+UserProfileSetup.propTypes = {
+  user: PropTypes.shape({
+    uid: PropTypes.string.isRequired,
+    displayName: PropTypes.string,
+    email: PropTypes.string,
+    photoURL: PropTypes.string,
+  }).isRequired,
+  onProfileComplete: PropTypes.func.isRequired,
 };
 
 export default UserProfileSetup;
