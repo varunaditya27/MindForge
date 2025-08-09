@@ -106,7 +106,7 @@ const FeedbackCard = ({ feedback, scores }) => {
                     <div className={`text-3xl font-bold ${getScoreColor(score)}`}>
                       {score}
                     </div>
-                    <div className="text-gray-500 text-sm">/ 10</div>
+                    <div className="text-gray-500 text-sm">/ 100</div>
                   </div>
                 </div>
               );
