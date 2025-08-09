@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebase_config';
-import { getUserProfile, saveUserProfile, getFeedback, getScores } from './utils/storage';
+import { getUserProfile, saveUserProfile, getFeedback, getScores, clearUserData } from './utils/storage';
 import { getUserProfileApi, upsertUserProfile } from './utils/api';
 
 // Components
@@ -25,10 +25,12 @@ function App() {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       if (user) {
-        // Load saved profile and feedback
-        const savedProfile = getUserProfile();
-        const savedFeedback = getFeedback();
-        const savedScores = getScores();
+        // Namespace storage per user (prefer email, else uid)
+        const userKey = user.email || user.uid;
+        // Load saved profile and feedback for this user
+        const savedProfile = getUserProfile(userKey);
+        const savedFeedback = getFeedback(userKey);
+        const savedScores = getScores(userKey);
         
         setUserProfile(savedProfile);
         setFeedback(savedFeedback);
@@ -38,7 +40,8 @@ function App() {
           try {
             const res = await getUserProfileApi(user.uid);
             if (res.success && res.data) {
-              saveUserProfile(res.data);
+              // Prefer server profile on login
+              saveUserProfile(res.data, userKey);
               setUserProfile(res.data);
             } else if (!savedProfile) {
               // Create minimal profile if not existing server-side
@@ -52,7 +55,7 @@ function App() {
               };
               const up = await upsertUserProfile(minimal);
               if (up.success) {
-                saveUserProfile(up.data);
+                saveUserProfile(up.data, userKey);
                 setUserProfile(up.data);
               }
             }
@@ -77,6 +80,10 @@ function App() {
   };
 
   const handleSignOut = () => {
+    const userKey = user?.email || user?.uid;
+    if (userKey) {
+      clearUserData(userKey);
+    }
     setUser(null);
     setUserProfile(null);
     setFeedback(null);
@@ -84,10 +91,11 @@ function App() {
   };
 
   const handleProfileComplete = (profile) => {
-  setUserProfile(profile);
-  saveUserProfile(profile);
-  // persist to backend
-  upsertUserProfile(profile);
+    const userKey = profile.email || profile.uid;
+    setUserProfile(profile);
+    saveUserProfile(profile, userKey);
+    // persist to backend
+    upsertUserProfile(profile);
   };
 
   const handleSubmissionSuccess = (submissionResult) => {
@@ -128,7 +136,7 @@ function App() {
   }
 
   // Show profile setup if user but profile is missing or incomplete
-  if (!userProfile || !userProfile.branch || !userProfile.rollNumber) {
+  if (!userProfile?.branch || !userProfile?.rollNumber) {
     return (
       <UserProfileSetup 
         user={user} 
