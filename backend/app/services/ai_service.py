@@ -4,6 +4,7 @@ import logging
 from typing import Dict, Any, Optional
 from ..core.config import settings
 from ..models.schemas import IdeaSubmission, EvaluationResponse
+from datetime import datetime, timezone
 
 logger = logging.getLogger(__name__)
 
@@ -36,34 +37,45 @@ class AIService:
             str: Formatted prompt for AI evaluation
         """
         return f"""
-        Evaluate the following business idea submitted by a college student for a coding event.
-        
-        Student: {submission.name}
-        Branch: {submission.branch}
-        Roll Number: {submission.rollNumber}
-        
-        Business Idea:
-        {submission.idea}
-        
-        Please evaluate this idea on the following criteria (each out of 10 points):
-        1. Feasibility - How realistic and achievable is this idea with current technology and resources?
-        2. Originality - How unique and innovative is this concept? Does it offer something new?
-        3. Scalability - Can this idea grow and expand to serve more users or markets?
-        4. Impact - What positive change or value will this idea create for society or its target audience?
-        
-        Provide detailed feedback that is constructive, encouraging, and educational. Focus on both strengths and areas for improvement.
-        The feedback should be 2-3 paragraphs long and help the student understand how to improve their idea.
-        
-        Respond in the following JSON format:
-        {{
-            "feasibility": <score 1-10>,
-            "originality": <score 1-10>,
-            "scalability": <score 1-10>,
-            "impact": <score 1-10>,
-            "totalScore": <sum of all scores>,
-            "feedback": "<detailed constructive feedback in 2-3 paragraphs>"
-        }}
-        """
+    Evaluate the following business idea submitted by a college student for a coding event.
+
+    Student: {submission.name}
+    Branch: {submission.branch}
+    Roll Number: {submission.rollNumber}
+
+    Business Idea:
+    {submission.idea}
+
+    Score each of the following 10 criteria on a scale of 1-100 (integers only). Then compute totalScore as the average of all 10 criteria (rounded to nearest integer), clamped to 1-100. Be critical and specific:
+    - problemClarity: How clear and specific is the problem definition?
+    - originality: How novel and differentiated is the idea?
+    - feasibility: Is the solution technically and practically feasible?
+    - technicalComplexity: Depth and rigor of the proposed technical approach.
+    - scalability: Ability to scale to more users/markets.
+    - marketSize: Size and accessibility of the target market.
+    - businessModel: Clarity and viability of monetization.
+    - impact: Expected user/societal impact.
+    - executionPlan: Realism of roadmap and MVP readiness.
+    - riskMitigation: Awareness and mitigation of key risks.
+
+    Provide constructive feedback (2-3 paragraphs) covering strengths, specific weaknesses, and concrete next steps.
+
+        Respond ONLY in strict JSON (no markdown), with these exact keys (all integers 1-100):
+        {
+            "problemClarity": 1-100,
+            "originality": 1-100,
+            "feasibility": 1-100,
+            "technicalComplexity": 1-100,
+            "scalability": 1-100,
+            "marketSize": 1-100,
+            "businessModel": 1-100,
+            "impact": 1-100,
+            "executionPlan": 1-100,
+            "riskMitigation": 1-100,
+            "totalScore": 1-100,
+            "feedback": "<2-3 paragraphs>"
+        }
+    """
     
     def _parse_ai_response(self, response_text: str) -> Dict[str, Any]:
         """
@@ -92,35 +104,46 @@ class AIService:
             evaluation_data = json.loads(evaluation_text.strip())
             
             # Validate required fields
-            required_fields = ['feasibility', 'originality', 'scalability', 'impact', 'feedback']
+            required_fields = [
+                'problemClarity','originality','feasibility','technicalComplexity','scalability',
+                'marketSize','businessModel','impact','executionPlan','riskMitigation','feedback'
+            ]
             for field in required_fields:
                 if field not in evaluation_data:
                     raise ValueError(f"Missing required field: {field}")
             
-            # Validate score ranges
-            for score_field in ['feasibility', 'originality', 'scalability', 'impact']:
+            # Validate score ranges for all criteria (1-100)
+            for score_field in [
+                'problemClarity','originality','feasibility','technicalComplexity','scalability',
+                'marketSize','businessModel','impact','executionPlan','riskMitigation'
+            ]:
                 score_raw = evaluation_data[score_field]
                 try:
                     score = int(score_raw)
                 except Exception:
                     raise ValueError(f"Invalid score for {score_field}: {score_raw}")
                 # Clamp to valid bounds
-                score = max(1, min(10, score))
+                score = max(1, min(100, score))
                 evaluation_data[score_field] = score
             
-            # Calculate and validate total score
-            total_score = (
-                evaluation_data['feasibility'] + 
-                evaluation_data['originality'] + 
-                evaluation_data['scalability'] + 
-                evaluation_data['impact']
-            )
+            # Calculate and validate total score (average of criteria)
+            total_sum = sum([
+                evaluation_data['problemClarity'], evaluation_data['originality'], evaluation_data['feasibility'],
+                evaluation_data['technicalComplexity'], evaluation_data['scalability'], evaluation_data['marketSize'],
+                evaluation_data['businessModel'], evaluation_data['impact'], evaluation_data['executionPlan'],
+                evaluation_data['riskMitigation']
+            ])
+            total_score = round(total_sum / 10)
+            total_score = max(1, min(100, total_score))
             evaluation_data['totalScore'] = total_score
             
             # Validate feedback
             if not isinstance(evaluation_data['feedback'], str) or len(evaluation_data['feedback']) < 50:
                 raise ValueError("Feedback must be a string with at least 50 characters")
             
+            # Add evaluatedAt timestamp
+            evaluation_data['evaluatedAt'] = datetime.now(timezone.utc).isoformat()
+
             return evaluation_data
 
         except json.JSONDecodeError as e:
@@ -171,29 +194,50 @@ class AIService:
             # Create response model
             evaluation_response = EvaluationResponse(**evaluation_data)
 
-            logger.info(f"AI evaluation completed for {submission.name}: {evaluation_response.totalScore}/40")
+            logger.info(f"AI evaluation completed for {submission.name}: {evaluation_response.totalScore}/100")
             return evaluation_response
 
         except Exception as e:
             logger.error(f"AI evaluation failed for {submission.name}: {e}")
             # Fallback to a safe synthetic evaluation to avoid 500s
             idea_len = len(submission.idea or '')
-            feasibility = max(1, min(10, idea_len // 120 + 3))
-            originality = 6
-            scalability = max(1, min(10, idea_len // 140 + 3))
-            impact = 6
-            total = feasibility + originality + scalability + impact
+            # Heuristic fallback across 10 criteria
+            # Heuristic fallback on 100-scale
+            base = max(20, min(85, idea_len // 20 + 20))
+            jitter = lambda n: max(1, min(100, n + (idea_len % 13) - 6))
+            problem_clarity = jitter(base)
+            originality = jitter(base - 5)
+            feasibility = jitter(base - 8)
+            technical_complexity = jitter(base - 10)
+            scalability = jitter(base - 7)
+            market_size = jitter(base - 4)
+            business_model = jitter(base - 6)
+            impact = jitter(base - 2)
+            execution_plan = jitter(base - 9)
+            risk_mitigation = jitter(base - 8)
+            total10 = sum([
+                problem_clarity, originality, feasibility, technical_complexity, scalability,
+                market_size, business_model, impact, execution_plan, risk_mitigation
+            ])
+            total = max(1, min(100, round(total10 / 10)))
             feedback_text = (
                 "Temporary evaluation generated due to AI service issue. "
                 "Add concrete problem definition, audience, differentiation, and an MVP rollout plan to raise feasibility and scalability."
             )
             return EvaluationResponse(
-                feasibility=feasibility,
+                problemClarity=problem_clarity,
                 originality=originality,
+                feasibility=feasibility,
+                technicalComplexity=technical_complexity,
                 scalability=scalability,
+                marketSize=market_size,
+                businessModel=business_model,
                 impact=impact,
+                executionPlan=execution_plan,
+                riskMitigation=risk_mitigation,
                 totalScore=total,
                 feedback=feedback_text,
+                evaluatedAt=datetime.now(timezone.utc).isoformat(),
             )
 
 # Create singleton instance
