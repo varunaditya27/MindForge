@@ -35,13 +35,19 @@ const IdeaSubmissionForm = ({ userProfile, onSubmissionSuccess }) => {
   // Save feedback and scores to localStorage (per-user)
   const userKey = userProfile.email || userProfile.uid;
   saveFeedback(result.data, userKey);
-  saveScores({
-        feasibility: result.data.feasibility,
+      saveScores({
+        problemClarity: result.data.problemClarity,
         originality: result.data.originality,
+        feasibility: result.data.feasibility,
+        technicalComplexity: result.data.technicalComplexity,
         scalability: result.data.scalability,
+        marketSize: result.data.marketSize,
+        businessModel: result.data.businessModel,
         impact: result.data.impact,
+        executionPlan: result.data.executionPlan,
+        riskMitigation: result.data.riskMitigation,
         totalScore: result.data.totalScore
-  }, userKey);
+      }, userKey);
 
       setIsSubmitted(true);
       onSubmissionSuccess(result.data);
