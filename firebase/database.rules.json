@@ -1,0 +1,11 @@
+{
+  "rules": {
+    "leaderboard": {
+      ".read": true,
+      ".write": false,
+      "$uid": {
+        ".validate": "newData.hasChildren(['name', 'branch', 'score']) && newData.child('name').isString() && newData.child('branch').isString() && newData.child('score').isNumber() && newData.child('score').val() >= 0 && newData.child('score').val() <= 40"
+      }
+    }
+  }
+}
