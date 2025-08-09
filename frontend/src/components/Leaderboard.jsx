@@ -61,9 +61,9 @@ const Leaderboard = ({ currentUser }) => {
   };
 
   const getScoreColor = (score) => {
-    if (score >= 32) return 'text-green-400';
-    if (score >= 24) return 'text-yellow-400';
-    if (score >= 16) return 'text-orange-400';
+    if (score >= 85) return 'text-green-400';
+    if (score >= 70) return 'text-yellow-400';
+    if (score >= 55) return 'text-orange-400';
     return 'text-red-400';
   };
 
@@ -208,7 +208,7 @@ const Leaderboard = ({ currentUser }) => {
                           {entry.score}
                         </div>
                         <div className="text-xs text-gray-500">
-                          / 40 points
+                          / 100 points
                         </div>
                       </div>
                     </div>
