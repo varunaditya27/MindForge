@@ -29,53 +29,45 @@ class AIService:
     def _create_evaluation_prompt(self, submission: IdeaSubmission) -> str:
         """
         Create a structured prompt for idea evaluation
-        
-        Args:
-            submission: The idea submission data
-            
-        Returns:
-            str: Formatted prompt for AI evaluation
         """
-        return f"""
-    Evaluate the following business idea submitted by a college student for a coding event.
-
-    Student: {submission.name}
-    Branch: {submission.branch}
-    Roll Number: {submission.rollNumber}
-
-    Business Idea:
-    {submission.idea}
-
-    Score each of the following 10 criteria on a scale of 1-100 (integers only). Then compute totalScore as the average of all 10 criteria (rounded to nearest integer), clamped to 1-100. Be critical and specific:
-    - problemClarity: How clear and specific is the problem definition?
-    - originality: How novel and differentiated is the idea?
-    - feasibility: Is the solution technically and practically feasible?
-    - technicalComplexity: Depth and rigor of the proposed technical approach.
-    - scalability: Ability to scale to more users/markets.
-    - marketSize: Size and accessibility of the target market.
-    - businessModel: Clarity and viability of monetization.
-    - impact: Expected user/societal impact.
-    - executionPlan: Realism of roadmap and MVP readiness.
-    - riskMitigation: Awareness and mitigation of key risks.
-
-    Provide constructive feedback (2-3 paragraphs) covering strengths, specific weaknesses, and concrete next steps.
-
-        Respond ONLY in strict JSON (no markdown), with these exact keys (all integers 1-100):
-        {
-            "problemClarity": 1-100,
-            "originality": 1-100,
-            "feasibility": 1-100,
-            "technicalComplexity": 1-100,
-            "scalability": 1-100,
-            "marketSize": 1-100,
-            "businessModel": 1-100,
-            "impact": 1-100,
-            "executionPlan": 1-100,
-            "riskMitigation": 1-100,
-            "totalScore": 1-100,
-            "feedback": "<2-3 paragraphs>"
-        }
-    """
+        prompt = (
+            "Evaluate the following business idea submitted by a college student for a coding event.\n\n"
+            f"Student: {submission.name}\n"
+            f"Branch: {submission.branch}\n"
+            f"Roll Number: {submission.rollNumber}\n\n"
+            "Business Idea:\n"
+            f"{submission.idea}\n\n"
+            "Score each of the following 10 criteria on a scale of 1-100 (integers only). "
+            "Then compute totalScore as the average of all 10 criteria (rounded to nearest integer), "
+            "clamped to 1-100. Be critical and specific:\n"
+            "- problemClarity: How clear and specific is the problem definition?\n"
+            "- originality: How novel and differentiated is the idea?\n"
+            "- feasibility: Is the solution technically and practically feasible?\n"
+            "- technicalComplexity: Depth and rigor of the proposed technical approach.\n"
+            "- scalability: Ability to scale to more users/markets.\n"
+            "- marketSize: Size and accessibility of the target market.\n"
+            "- businessModel: Clarity and viability of monetization.\n"
+            "- impact: Expected user/societal impact.\n"
+            "- executionPlan: Realism of roadmap and MVP readiness.\n"
+            "- riskMitigation: Awareness and mitigation of key risks.\n\n"
+            "Provide constructive feedback (2-3 paragraphs) covering strengths, specific weaknesses, and concrete next steps.\n\n"
+            "Respond ONLY in strict JSON (no markdown), with these exact keys (all integers 1-100):\n"
+            "{{\n"
+            '  "problemClarity": 1-100,\n'
+            '  "originality": 1-100,\n'
+            '  "feasibility": 1-100,\n'
+            '  "technicalComplexity": 1-100,\n'
+            '  "scalability": 1-100,\n'
+            '  "marketSize": 1-100,\n'
+            '  "businessModel": 1-100,\n'
+            '  "impact": 1-100,\n'
+            '  "executionPlan": 1-100,\n'
+            '  "riskMitigation": 1-100,\n'
+            '  "totalScore": 1-100,\n'
+            '  "feedback": "<2-3 paragraphs>"\n'
+            "}}\n"
+        )
+        return prompt
     
     def _parse_ai_response(self, response_text: str) -> Dict[str, Any]:
         """
