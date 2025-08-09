@@ -17,18 +17,26 @@ class FirebaseService:
         """Initialize Firebase Admin SDK and Firestore client"""
         try:
             if not firebase_admin._apps:
-                # Try to use service account key file first (for local development)
-                service_account_path = settings.FIREBASE_SERVICE_ACCOUNT_KEY
+                # Prefer explicit Service Account JSON from environment if provided (good for Render/CI)
                 try:
-                    import os
-                    if os.path.exists(service_account_path):
-                        cred = credentials.Certificate(service_account_path)
+                    if settings.FIREBASE_SERVICE_ACCOUNT_JSON:
+                        import json
+                        info = json.loads(settings.FIREBASE_SERVICE_ACCOUNT_JSON)
+                        cred = credentials.Certificate(info)
                         firebase_admin.initialize_app(cred)
-                        logger.info("Firebase initialized with service account credentials")
+                        logger.info("Firebase initialized with JSON credentials from env")
                     else:
-                        # For production deployment, use default credentials
-                        firebase_admin.initialize_app()
-                        logger.info("Firebase initialized with default credentials")
+                        # Try to use service account key file first (for local development)
+                        import os
+                        service_account_path = settings.FIREBASE_SERVICE_ACCOUNT_KEY
+                        if os.path.exists(service_account_path):
+                            cred = credentials.Certificate(service_account_path)
+                            firebase_admin.initialize_app(cred)
+                            logger.info("Firebase initialized with service account file")
+                        else:
+                            # For production deployment, use default credentials (e.g., Google Cloud)
+                            firebase_admin.initialize_app()
+                            logger.info("Firebase initialized with default application credentials")
                 except Exception:
                     # Fallback: try default credentials
                     try:
