@@ -46,3 +46,4 @@ RVCE_LOGO/
 *.pyc
 __pycache__/
 venv/
+backend/firebase_admin_sdk.json
