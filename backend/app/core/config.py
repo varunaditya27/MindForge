@@ -28,11 +28,21 @@ class Settings:
     # External API Keys
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
     
-    # Firebase Settings
+    # Firebase Settings (split credentials only)
     FIREBASE_PROJECT_ID: str = os.getenv("FIREBASE_PROJECT_ID", "")
-    FIREBASE_SERVICE_ACCOUNT_KEY: str = os.getenv("FIREBASE_SERVICE_ACCOUNT_KEY", "firebase_admin_sdk.json")
-    # Optional: provide the full Service Account JSON via env instead of a file
-    FIREBASE_SERVICE_ACCOUNT_JSON: str = os.getenv("FIREBASE_SERVICE_ACCOUNT_JSON", "")
+    # Split credentials (Render-friendly)
+    FIREBASE_TYPE: str = os.getenv("FIREBASE_TYPE", "service_account")
+    FIREBASE_PRIVATE_KEY_ID: str = os.getenv("FIREBASE_PRIVATE_KEY_ID", "")
+    FIREBASE_PRIVATE_KEY: str = os.getenv("FIREBASE_PRIVATE_KEY", "")
+    FIREBASE_CLIENT_EMAIL: str = os.getenv("FIREBASE_CLIENT_EMAIL", "")
+    FIREBASE_CLIENT_ID: str = os.getenv("FIREBASE_CLIENT_ID", "")
+    FIREBASE_AUTH_URI: str = os.getenv("FIREBASE_AUTH_URI", "https://accounts.google.com/o/oauth2/auth")
+    FIREBASE_TOKEN_URI: str = os.getenv("FIREBASE_TOKEN_URI", "https://oauth2.googleapis.com/token")
+    FIREBASE_AUTH_PROVIDER_X509_CERT_URL: str = os.getenv(
+        "FIREBASE_AUTH_PROVIDER_X509_CERT_URL", "https://www.googleapis.com/oauth2/v1/certs"
+    )
+    FIREBASE_CLIENT_X509_CERT_URL: str = os.getenv("FIREBASE_CLIENT_X509_CERT_URL", "")
+    FIREBASE_UNIVERSE_DOMAIN: str = os.getenv("FIREBASE_UNIVERSE_DOMAIN", "googleapis.com")
     
     # Validation
     def validate_settings(self) -> None:

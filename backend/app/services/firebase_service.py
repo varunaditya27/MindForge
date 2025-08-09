@@ -13,40 +13,48 @@ class FirebaseService:
         self._firebase_available = False
         self._initialize_firebase()
     
+    def _get_credentials(self):
+        """Build firebase_admin credentials strictly from split env variables.
+        Returns a tuple (cred_or_none, source_str).
+        """
+        if (
+            settings.FIREBASE_PRIVATE_KEY
+            and settings.FIREBASE_CLIENT_EMAIL
+            and settings.FIREBASE_PRIVATE_KEY_ID
+        ):
+            try:
+                info = {
+                    "type": settings.FIREBASE_TYPE or "service_account",
+                    "project_id": settings.FIREBASE_PROJECT_ID,
+                    "private_key_id": settings.FIREBASE_PRIVATE_KEY_ID,
+                    # Ensure newlines are real
+                    "private_key": settings.FIREBASE_PRIVATE_KEY.replace("\\n", "\n"),
+                    "client_email": settings.FIREBASE_CLIENT_EMAIL,
+                    "client_id": settings.FIREBASE_CLIENT_ID,
+                    "auth_uri": settings.FIREBASE_AUTH_URI,
+                    "token_uri": settings.FIREBASE_TOKEN_URI,
+                    "auth_provider_x509_cert_url": settings.FIREBASE_AUTH_PROVIDER_X509_CERT_URL,
+                    "client_x509_cert_url": settings.FIREBASE_CLIENT_X509_CERT_URL,
+                    "universe_domain": settings.FIREBASE_UNIVERSE_DOMAIN,
+                }
+                return credentials.Certificate(info), "env_split"
+            except Exception as e:
+                logger.warning(f"Invalid split FIREBASE_* env credentials: {e}")
+        return None, "missing"
+
     def _initialize_firebase(self) -> None:
         """Initialize Firebase Admin SDK and Firestore client"""
         try:
             if not firebase_admin._apps:
-                # Prefer explicit Service Account JSON from environment if provided (good for Render/CI)
-                try:
-                    if settings.FIREBASE_SERVICE_ACCOUNT_JSON:
-                        import json
-                        info = json.loads(settings.FIREBASE_SERVICE_ACCOUNT_JSON)
-                        cred = credentials.Certificate(info)
-                        firebase_admin.initialize_app(cred)
-                        logger.info("Firebase initialized with JSON credentials from env")
-                    else:
-                        # Try to use service account key file first (for local development)
-                        import os
-                        service_account_path = settings.FIREBASE_SERVICE_ACCOUNT_KEY
-                        if os.path.exists(service_account_path):
-                            cred = credentials.Certificate(service_account_path)
-                            firebase_admin.initialize_app(cred)
-                            logger.info("Firebase initialized with service account file")
-                        else:
-                            # For production deployment, use default credentials (e.g., Google Cloud)
-                            firebase_admin.initialize_app()
-                            logger.info("Firebase initialized with default application credentials")
-                except Exception:
-                    # Fallback: try default credentials
-                    try:
-                        firebase_admin.initialize_app()
-                        logger.info("Firebase initialized with default credentials (fallback)")
-                    except Exception as fallback_error:
-                        logger.warning(f"Firebase credentials not available: {fallback_error}")
-                        logger.warning("Running in development mode without Firebase")
-                        self._firebase_available = False
-                        return
+                cred, source = self._get_credentials()
+                if cred is not None:
+                    firebase_admin.initialize_app(cred)
+                    logger.info(f"Firebase initialized with credentials source: {source}")
+                else:
+                    logger.warning("Firebase split credentials missing; skipping initialization")
+                    self._firebase_available = False
+                    return
+
             # Initialize Firestore client
             self._db = firestore.client()
             self._firebase_available = True
