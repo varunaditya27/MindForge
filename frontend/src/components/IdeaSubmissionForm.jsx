@@ -32,15 +32,16 @@ const IdeaSubmissionForm = ({ userProfile, onSubmissionSuccess }) => {
     const result = await submitIdea(submissionData);
 
     if (result.success) {
-      // Save feedback and scores to localStorage
-      saveFeedback(result.data);
-      saveScores({
+  // Save feedback and scores to localStorage (per-user)
+  const userKey = userProfile.email || userProfile.uid;
+  saveFeedback(result.data, userKey);
+  saveScores({
         feasibility: result.data.feasibility,
         originality: result.data.originality,
         scalability: result.data.scalability,
         impact: result.data.impact,
         totalScore: result.data.totalScore
-      });
+  }, userKey);
 
       setIsSubmitted(true);
       onSubmissionSuccess(result.data);
@@ -197,6 +198,7 @@ IdeaSubmissionForm.propTypes = {
   userProfile: PropTypes.shape({
     uid: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
+  email: PropTypes.string,
     branch: PropTypes.string.isRequired,
     rollNumber: PropTypes.string.isRequired,
   }).isRequired,
