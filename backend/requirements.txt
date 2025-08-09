@@ -1,0 +1,21 @@
+# FastAPI and server
+fastapi==0.115.0
+uvicorn[standard]==0.32.1
+
+# AI and external APIs
+google-generativeai==0.8.3
+
+# Firebase
+firebase-admin==6.5.0
+
+# Data validation and parsing
+pydantic==2.9.2
+
+# Environment and configuration
+python-dotenv==1.0.1
+
+# HTTP and file handling
+python-multipart==0.0.12
+
+# Utilities
+cors==1.0.1
