@@ -68,10 +68,14 @@ The API will be available at `http://localhost:8000`
 - `GET /health` - Health check
 
 ### Ideas
-- `POST /ideas/submit` - Submit idea for evaluation
+- `POST /ideas/submit` - Submit idea for evaluation (10 criteria, totalScore is average)
 
 ### Leaderboard
 - `GET /leaderboard` - Get current rankings
+
+### Users
+- `POST /users/profile` - Create/update user profile (branch, rollNumber); persists `lastEvaluation`
+- `GET /users/profile/{uid}` - Get user profile, including latest `lastEvaluation` if present
 
 ## 🧩 Architecture
 
@@ -146,11 +150,19 @@ The API will be available at `http://localhost:8000`
 
 ## 📊 AI Evaluation
 
-### Scoring Criteria
-1. **Feasibility** (1-10): Technical and resource feasibility
-2. **Originality** (1-10): Innovation and uniqueness
-3. **Scalability** (1-10): Growth potential
-4. **Impact** (1-10): Social/economic value
+### Scoring Criteria (10, each 1–100)
+1. Problem Clarity
+2. Originality
+3. Feasibility
+4. Technical Complexity
+5. Scalability
+6. Market Size
+7. Business Model
+8. Impact
+9. Execution Plan
+10. Risk Mitigation
+
+Total score is the average of all 10 criteria (rounded, 1–100).
 
 ### Prompt Engineering
 - Structured prompts for consistent evaluation

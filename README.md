@@ -9,6 +9,7 @@ AI-powered idea evaluation platform for RVCE coding events. Submit your business
 - **Mobile-First Design**: Sleek, dark-themed interface optimized for mobile devices
 - **Secure Authentication**: Google Sign-In with Firebase authentication
 - **Private Feedback**: Detailed AI feedback stored locally, only scores are public
+ - **Private Feedback**: Detailed AI feedback and scores are persisted privately (Firestore `users/{uid}.lastEvaluation`) and shown only to you; leaderboard shows only name, branch, and total score
 - **Professional UI**: Modern design with smooth animations and responsive layout
 
 ## 🏗️ Architecture
@@ -84,14 +85,14 @@ FIREBASE_SERVICE_ACCOUNT_KEY=./firebase_admin_sdk.json
 1. **User Authentication**: Google Sign-In via Firebase Auth
 2. **Profile Setup**: Branch and roll number collection
 3. **Idea Submission**: Text submitted to FastAPI backend
-4. **AI Evaluation**: Gemini AI processes and scores the idea
-5. **Leaderboard Update**: Public data (name, branch, score) saved to Firestore (server-side)
-6. **Feedback Display**: Private feedback returned to user and stored locally
+4. **AI Evaluation**: Gemini AI processes and scores the idea across 10 criteria (1–100 each)
+5. **Leaderboard Update**: Public data (name, branch, totalScore) saved to Firestore (server-side)
+6. **Private Feedback Persistence**: Full evaluation (all criteria, feedback, evaluatedAt) is stored under `users/{uid}.lastEvaluation` in Firestore and returned to the client after login
 
 ## 🔒 Privacy & Security
 
-- **Public Data**: Only name, branch, and total score appear on leaderboard
-- **Private Data**: Detailed feedback and individual scores stay on user's device
+- **Public Data**: Only name, branch, and total score (0–100) appear on leaderboard
+- **Private Data**: Detailed feedback and per-criterion scores are stored privately under your profile (`users/{uid}.lastEvaluation`) and are never exposed publicly
 - **Secure API**: All backend calls use HTTPS with proper CORS configuration
 - **Firebase Rules**: Backend-only writes; clients read via API (no direct DB access)
 
