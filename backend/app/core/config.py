@@ -31,8 +31,12 @@ class Settings:
     # Validation
     def validate_settings(self) -> None:
         """Validate that all required settings are present"""
+        # Keep non-fatal to allow running without Gemini in dev or fallback mode
         if not self.GEMINI_API_KEY:
-            raise ValueError("GEMINI_API_KEY environment variable is required")
+            import logging
+            logging.getLogger(__name__).warning(
+                "GEMINI_API_KEY not set; AI evaluation will use a safe fallback."
+            )
     # Firestore does not require a database URL
 
 # Create settings instance
