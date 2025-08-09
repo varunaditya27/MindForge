@@ -31,7 +31,7 @@ async def submit_idea(submission: IdeaSubmission):
                 detail="Failed to evaluate idea with AI. Please try again."
             )
         
-        # Prepare leaderboard data
+    # Prepare leaderboard data (0-100)
         leaderboard_data = {
             'name': submission.name,
             'branch': submission.branch,
@@ -45,14 +45,17 @@ async def submit_idea(submission: IdeaSubmission):
             # Don't fail the request if leaderboard update fails
             # The user still gets their evaluation
         
-        # Also upsert user profile so branch and rollNumber persist server-side
+        # Also upsert user profile so branch and rollNumber persist server-side,
+        # and store lastEvaluation for cross-device/account switching
         try:
-            firebase_service.upsert_user_profile(submission.uid, {
+            payload = {
                 'uid': submission.uid,
                 'name': submission.name,
                 'branch': submission.branch,
                 'rollNumber': submission.rollNumber,
-            })
+                'lastEvaluation': evaluation.model_dump(),
+            }
+            firebase_service.upsert_user_profile(submission.uid, payload)
         except Exception:
             pass
 
