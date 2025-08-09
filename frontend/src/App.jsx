@@ -28,9 +28,9 @@ function App() {
         // Namespace storage per user (prefer email, else uid)
         const userKey = user.email || user.uid;
         // Load saved profile and feedback for this user
-        const savedProfile = getUserProfile(userKey);
-        const savedFeedback = getFeedback(userKey);
-        const savedScores = getScores(userKey);
+  const savedProfile = getUserProfile(userKey);
+  const savedFeedback = getFeedback(userKey);
+  const savedScores = getScores(userKey);
         
         setUserProfile(savedProfile);
         setFeedback(savedFeedback);
@@ -43,6 +43,24 @@ function App() {
               // Prefer server profile on login
               saveUserProfile(res.data, userKey);
               setUserProfile(res.data);
+              // If server has lastEvaluation, hydrate local feedback/scores
+              if (res.data.lastEvaluation) {
+                const ev = res.data.lastEvaluation;
+                setFeedback({ feedback: ev.feedback });
+                setScores({
+                  problemClarity: ev.problemClarity,
+                  originality: ev.originality,
+                  feasibility: ev.feasibility,
+                  technicalComplexity: ev.technicalComplexity,
+                  scalability: ev.scalability,
+                  marketSize: ev.marketSize,
+                  businessModel: ev.businessModel,
+                  impact: ev.impact,
+                  executionPlan: ev.executionPlan,
+                  riskMitigation: ev.riskMitigation,
+                  totalScore: ev.totalScore,
+                });
+              }
             } else if (!savedProfile) {
               // Create minimal profile if not existing server-side
               const minimal = {
@@ -101,10 +119,16 @@ function App() {
   const handleSubmissionSuccess = (submissionResult) => {
     setFeedback(submissionResult);
     setScores({
-      feasibility: submissionResult.feasibility,
-      originality: submissionResult.originality,
-      scalability: submissionResult.scalability,
-      impact: submissionResult.impact,
+  problemClarity: submissionResult.problemClarity,
+  originality: submissionResult.originality,
+  feasibility: submissionResult.feasibility,
+  technicalComplexity: submissionResult.technicalComplexity,
+  scalability: submissionResult.scalability,
+  marketSize: submissionResult.marketSize,
+  businessModel: submissionResult.businessModel,
+  impact: submissionResult.impact,
+  executionPlan: submissionResult.executionPlan,
+  riskMitigation: submissionResult.riskMitigation,
       totalScore: submissionResult.totalScore
     });
   };
