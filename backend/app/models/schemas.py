@@ -12,20 +12,27 @@ class IdeaSubmission(BaseModel):
     idea: str = Field(..., min_length=50, max_length=2000, description="Business idea description")
 
 class EvaluationResponse(BaseModel):
-    """Model for AI evaluation response"""
-    feasibility: int = Field(..., ge=1, le=10, description="Feasibility score (1-10)")
-    originality: int = Field(..., ge=1, le=10, description="Originality score (1-10)")
-    scalability: int = Field(..., ge=1, le=10, description="Scalability score (1-10)")
-    impact: int = Field(..., ge=1, le=10, description="Impact score (1-10)")
-    totalScore: int = Field(..., ge=4, le=40, description="Total score (sum of all criteria)")
+    """Model for AI evaluation response (10 criteria, each 1-100; totalScore is average 1-100)"""
+    problemClarity: int = Field(..., ge=1, le=100, description="How clear and specific is the problem definition")
+    originality: int = Field(..., ge=1, le=100, description="Novelty and differentiation")
+    feasibility: int = Field(..., ge=1, le=100, description="Technical and practical feasibility")
+    technicalComplexity: int = Field(..., ge=1, le=100, description="Depth of technical approach")
+    scalability: int = Field(..., ge=1, le=100, description="Ability to scale the solution")
+    marketSize: int = Field(..., ge=1, le=100, description="Reach and size of target market")
+    businessModel: int = Field(..., ge=1, le=100, description="Clarity and viability of monetization")
+    impact: int = Field(..., ge=1, le=100, description="Societal/user impact")
+    executionPlan: int = Field(..., ge=1, le=100, description="Roadmap and MVP readiness")
+    riskMitigation: int = Field(..., ge=1, le=100, description="Awareness and mitigation of key risks")
+    totalScore: int = Field(..., ge=1, le=100, description="Overall score (average of criteria, 1-100)")
     feedback: str = Field(..., min_length=50, description="Detailed AI feedback")
+    evaluatedAt: Optional[str] = Field(None, description="ISO timestamp when evaluated")
 
 class LeaderboardEntry(BaseModel):
     """Model for leaderboard entry"""
     uid: str = Field(..., description=_FIREBASE_UID_DESC)
     name: str = Field(..., description="User's full name")
     branch: str = Field(..., description="Academic branch/department")
-    score: int = Field(..., ge=0, le=40, description="Total score")
+    score: int = Field(..., ge=0, le=100, description="Total score (0-100)")
 
 class APIResponse(BaseModel):
     """Generic API response model"""
@@ -50,3 +57,4 @@ class UserProfile(BaseModel):
     rollNumber: str = Field(..., min_length=1, max_length=20)
     createdAt: Optional[str] = Field(None, description="ISO timestamp when created")
     updatedAt: Optional[str] = Field(None, description="ISO timestamp when updated")
+    lastEvaluation: Optional[EvaluationResponse] = Field(None, description="Most recent AI evaluation")
