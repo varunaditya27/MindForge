@@ -8,8 +8,7 @@ AI-powered idea evaluation platform for RVCE coding events. Submit your business
 - **Live Leaderboard**: Auto-refreshes every few seconds as new ideas are submitted
 - **Mobile-First Design**: Sleek, dark-themed interface optimized for mobile devices
 - **Secure Authentication**: Google Sign-In with Firebase authentication
-- **Private Feedback**: Detailed AI feedback stored locally, only scores are public
- - **Private Feedback**: Detailed AI feedback and scores are persisted privately (Firestore `users/{uid}.lastEvaluation`) and shown only to you; leaderboard shows only name, branch, and total score
+- **Private Feedback**: Detailed AI feedback and per-criterion scores are stored privately under your profile (Firestore `users/{uid}.lastEvaluation`) and are shown only to you; leaderboard shows only name, branch, and total score
 - **Professional UI**: Modern design with smooth animations and responsive layout
 
 ## 🏗️ Architecture
@@ -68,6 +67,8 @@ VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 VITE_FIREBASE_APP_ID=your_app_id
 VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
 VITE_API_BASE_URL=http://localhost:8000
+# For production on Vercel:
+# VITE_API_BASE_URL=https://<your-render-service>.onrender.com
 ```
 
 **Backend (.env):**
@@ -78,6 +79,10 @@ CORS_ORIGINS=http://localhost:5173,https://your-domain.vercel.app
 DEBUG=true
 # Optional: path to Firebase service account JSON (default: ./firebase_admin_sdk.json)
 FIREBASE_SERVICE_ACCOUNT_KEY=./firebase_admin_sdk.json
+## Optional: allow all vercel.app previews
+# CORS_ALLOW_ORIGIN_REGEX=^https:\/\/.*vercel\.app$
+## Alternatively, provide service account JSON directly (recommended on Render)
+# FIREBASE_SERVICE_ACCOUNT_JSON={"type":"service_account", ...}
 ```
 
 ## 📊 Data Flow
@@ -101,12 +106,15 @@ FIREBASE_SERVICE_ACCOUNT_KEY=./firebase_admin_sdk.json
 ### Frontend (Vercel)
 1. Push code to GitHub
 2. Connect repository to Vercel
-3. Set environment variables in Vercel dashboard
+3. Set environment variables in Vercel dashboard (VITE_* Firebase config, VITE_API_BASE_URL)
 4. Deploy automatically on push
 
 ### Backend (Render)
 1. Connect repository to Render
 2. Set environment variables in Render dashboard
+	- GEMINI_API_KEY
+	- CORS_ORIGINS and/or CORS_ALLOW_ORIGIN_REGEX
+	- FIREBASE_SERVICE_ACCOUNT_JSON (paste the full JSON) or FIREBASE_SERVICE_ACCOUNT_KEY
 3. Deploy with auto-scaling FastAPI service
 
 ## 🛠️ Tech Stack
