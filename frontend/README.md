@@ -1,11 +1,11 @@
 # IdeaArena Frontend
 
-React + Vite + Tailwind CSS SPA for the IdeaArena event. Mobile-first, dark navy theme with real-time Firebase listeners and Google Sign-In.
+React + Vite + Tailwind CSS SPA for the IdeaArena event. Mobile-first, dark navy theme with backend-powered live leaderboard and Google Sign-In.
 
 ## Tech Stack
 - React 19 + Vite
 - Tailwind CSS 3
-- Firebase Web SDK (Auth + Realtime Database)
+- Firebase Web SDK (Auth only; leaderboard via backend to Firestore)
 - Lucide Icons
 
 ## Quick Start
@@ -30,7 +30,6 @@ VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
 VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 VITE_FIREBASE_APP_ID=your_app_id
 VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
-VITE_FIREBASE_DATABASE_URL=https://<project-id>-default-rtdb.firebaseio.com
 VITE_API_BASE_URL=http://localhost:8000
 ```
 
@@ -70,7 +69,7 @@ frontend/
 
 ## Firebase
 - Auth: Google Sign-In
-- Database: Realtime DB for `/leaderboard` (public read, backend-only write)
+- Leaderboard: served by backend from Firestore (client polls every ~5s; can move to SSE later)
 
 ## Troubleshooting
 - If Tailwind classes like `bg-dark-800` don’t work, ensure Tailwind is set up with `tailwindcss` in `postcss.config.js` and run a fresh dev server.

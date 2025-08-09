@@ -5,7 +5,7 @@ AI-powered idea evaluation platform for RVCE coding events. Submit your business
 ## 🌟 Features
 
 - **AI-Powered Evaluation**: Get instant feedback on your business ideas using Google's Gemini AI
-- **Real-time Leaderboard**: Live rankings updated instantly as new ideas are submitted
+- **Live Leaderboard**: Auto-refreshes every few seconds as new ideas are submitted
 - **Mobile-First Design**: Sleek, dark-themed interface optimized for mobile devices
 - **Secure Authentication**: Google Sign-In with Firebase authentication
 - **Private Feedback**: Detailed AI feedback stored locally, only scores are public
@@ -15,7 +15,7 @@ AI-powered idea evaluation platform for RVCE coding events. Submit your business
 
 - **Frontend**: React + Vite + Tailwind CSS
 - **Backend**: FastAPI + Gemini AI
-- **Database**: Firebase Realtime Database
+- **Database**: Firebase Firestore (via backend)
 - **Authentication**: Firebase Auth (Google Sign-In)
 - **Deployment**: Frontend on Vercel, Backend on Render
 
@@ -62,11 +62,10 @@ For more details, see:
 VITE_FIREBASE_API_KEY=your_firebase_api_key
 VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
 VITE_FIREBASE_PROJECT_ID=your_project_id
-VITE_FIREBASE_STORAGE_BUCKET=your_project.firebasestorage.app
+VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
 VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 VITE_FIREBASE_APP_ID=your_app_id
 VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
-VITE_FIREBASE_DATABASE_URL=your_database_url
 VITE_API_BASE_URL=http://localhost:8000
 ```
 
@@ -74,8 +73,10 @@ VITE_API_BASE_URL=http://localhost:8000
 ```
 GEMINI_API_KEY=your_gemini_api_key
 FIREBASE_PROJECT_ID=your_project_id
-FIREBASE_DATABASE_URL=your_database_url
 CORS_ORIGINS=http://localhost:5173,https://your-domain.vercel.app
+DEBUG=true
+# Optional: path to Firebase service account JSON (default: ./firebase_admin_sdk.json)
+FIREBASE_SERVICE_ACCOUNT_KEY=./firebase_admin_sdk.json
 ```
 
 ## 📊 Data Flow
@@ -84,7 +85,7 @@ CORS_ORIGINS=http://localhost:5173,https://your-domain.vercel.app
 2. **Profile Setup**: Branch and roll number collection
 3. **Idea Submission**: Text submitted to FastAPI backend
 4. **AI Evaluation**: Gemini AI processes and scores the idea
-5. **Leaderboard Update**: Public data (name, branch, score) saved to Firebase
+5. **Leaderboard Update**: Public data (name, branch, score) saved to Firestore (server-side)
 6. **Feedback Display**: Private feedback returned to user and stored locally
 
 ## 🔒 Privacy & Security
@@ -92,7 +93,7 @@ CORS_ORIGINS=http://localhost:5173,https://your-domain.vercel.app
 - **Public Data**: Only name, branch, and total score appear on leaderboard
 - **Private Data**: Detailed feedback and individual scores stay on user's device
 - **Secure API**: All backend calls use HTTPS with proper CORS configuration
-- **Firebase Rules**: Leaderboard is publicly readable, backend-only writable
+- **Firebase Rules**: Backend-only writes; clients read via API (no direct DB access)
 
 ## 🚢 Deployment
 
@@ -111,7 +112,7 @@ CORS_ORIGINS=http://localhost:5173,https://your-domain.vercel.app
 
 - **Frontend**: React 19, Vite, Tailwind CSS, Firebase SDK, Lucide Icons
 - **Backend**: FastAPI, Google Generative AI, Firebase Admin SDK, Pydantic
-- **Database**: Firebase Realtime Database
+- **Database**: Firebase Firestore (via backend API)
 - **Authentication**: Firebase Authentication
 - **AI**: Google Gemini Pro API
 - **Deployment**: Vercel + Render

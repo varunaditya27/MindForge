@@ -22,7 +22,7 @@ backend/
 │   └── services/
 │       ├── __init__.py
 │       ├── ai_service.py      # Gemini AI integration
-│       └── firebase_service.py # Firebase operations
+│       └── firebase_service.py # Firebase Firestore operations
 ├── main.py                    # FastAPI application entry point
 ├── run.py                     # Development server script
 ├── requirements.txt           # Python dependencies
@@ -41,7 +41,6 @@ Create `.env` file with:
 ```env
 GEMINI_API_KEY=your_gemini_api_key
 FIREBASE_PROJECT_ID=your_project_id
-FIREBASE_DATABASE_URL=your_database_url
 CORS_ORIGINS=http://localhost:5173,https://your-domain.com
 DEBUG=true
 # Optional: path to service account JSON if not using default creds
@@ -90,7 +89,7 @@ The API will be available at `http://localhost:8000`
   - Response parsing and validation
   - Error handling for AI failures
 
-- **firebase_service.py**: Firebase Realtime Database operations
+- **firebase_service.py**: Firebase Firestore operations
   - Leaderboard updates
   - Data retrieval
   - Connection management
@@ -113,16 +112,15 @@ The API will be available at `http://localhost:8000`
 |----------|-------------|----------|---------|
 | `GEMINI_API_KEY` | Google Gemini API key | Yes | - |
 | `FIREBASE_PROJECT_ID` | Firebase project ID | No | - |
-| `FIREBASE_DATABASE_URL` | Firebase Realtime DB URL | Yes | - |
 | `CORS_ORIGINS` | Allowed CORS origins | No | `http://localhost:5173` |
 | `DEBUG` | Enable debug mode | No | `false` |
+| `FIREBASE_SERVICE_ACCOUNT_KEY` | Path to Firebase service account JSON | No | `./firebase_admin_sdk.json` |
 
 ### Firebase Setup
 1. Create Firebase project
-2. Enable Realtime Database
-3. Set up authentication (for admin SDK)
-4. Configure security rules (see `/firebase/database.rules.json`)
-5. Add your service account JSON as `backend/firebase_admin_sdk.json` or set `FIREBASE_SERVICE_ACCOUNT_KEY` to its path
+2. Enable Firestore (Native mode)
+3. Set up a service account for Admin SDK
+4. Add your service account JSON as `backend/firebase_admin_sdk.json` or set `FIREBASE_SERVICE_ACCOUNT_KEY` to its path
 
 ### Gemini AI Setup
 1. Get API key from Google AI Studio
@@ -178,7 +176,7 @@ CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 ### Platform Deployment
 - **Render**: Connect GitHub repo, set environment variables
-- Required: `GEMINI_API_KEY`, `FIREBASE_DATABASE_URL`, `CORS_ORIGINS`
+  - Required: `GEMINI_API_KEY`, `CORS_ORIGINS`
 - Optional: `FIREBASE_SERVICE_ACCOUNT_KEY` (upload the JSON as a secret file and reference its mounted path)
 - **Heroku**: Use Procfile: `web: uvicorn main:app --host 0.0.0.0 --port $PORT`
 - **Railway**: Auto-deploy from GitHub with environment variables
