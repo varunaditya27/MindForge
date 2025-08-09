@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebase_config';
-import { getUserProfile, getFeedback, getScores } from './utils/storage';
+import { getUserProfile, saveUserProfile, getFeedback, getScores } from './utils/storage';
+import { getUserProfileApi, upsertUserProfile } from './utils/api';
 
 // Components
 import Login from './components/Login';
@@ -32,6 +33,34 @@ function App() {
         setUserProfile(savedProfile);
         setFeedback(savedFeedback);
         setScores(savedScores);
+        // Sync profile with backend Firestore
+        const syncProfile = async () => {
+          try {
+            const res = await getUserProfileApi(user.uid);
+            if (res.success && res.data) {
+              saveUserProfile(res.data);
+              setUserProfile(res.data);
+            } else if (!savedProfile) {
+              // Create minimal profile if not existing server-side
+              const minimal = {
+                uid: user.uid,
+                name: user.displayName || 'Anonymous',
+                email: user.email || '',
+                photoURL: user.photoURL || '',
+                branch: '',
+                rollNumber: ''
+              };
+              const up = await upsertUserProfile(minimal);
+              if (up.success) {
+                saveUserProfile(up.data);
+                setUserProfile(up.data);
+              }
+            }
+          } catch {
+            // ignore background sync errors
+          }
+        };
+        syncProfile();
       } else {
         setUserProfile(null);
         setFeedback(null);
@@ -55,7 +84,10 @@ function App() {
   };
 
   const handleProfileComplete = (profile) => {
-    setUserProfile(profile);
+  setUserProfile(profile);
+  saveUserProfile(profile);
+  // persist to backend
+  upsertUserProfile(profile);
   };
 
   const handleSubmissionSuccess = (submissionResult) => {
@@ -95,8 +127,8 @@ function App() {
     return <Login onLoginSuccess={handleLoginSuccess} />;
   }
 
-  // Show profile setup if user but no profile
-  if (!userProfile) {
+  // Show profile setup if user but profile is missing or incomplete
+  if (!userProfile || !userProfile.branch || !userProfile.rollNumber) {
     return (
       <UserProfileSetup 
         user={user} 
