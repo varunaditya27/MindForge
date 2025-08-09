@@ -45,6 +45,17 @@ async def submit_idea(submission: IdeaSubmission):
             # Don't fail the request if leaderboard update fails
             # The user still gets their evaluation
         
+        # Also upsert user profile so branch and rollNumber persist server-side
+        try:
+            firebase_service.upsert_user_profile(submission.uid, {
+                'uid': submission.uid,
+                'name': submission.name,
+                'branch': submission.branch,
+                'rollNumber': submission.rollNumber,
+            })
+        except Exception:
+            pass
+
         logger.info(f"Successfully processed submission for {submission.name}")
         return evaluation
         

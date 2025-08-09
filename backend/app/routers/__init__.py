@@ -2,5 +2,6 @@
 from .health import router as health_router
 from .ideas import router as ideas_router
 from .leaderboard import router as leaderboard_router
+from .users import router as users_router
 
-__all__ = ["health_router", "ideas_router", "leaderboard_router"]
+__all__ = ["health_router", "ideas_router", "leaderboard_router", "users_router"]
