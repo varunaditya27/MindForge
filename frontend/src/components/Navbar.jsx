@@ -1,5 +1,6 @@
 import React from 'react';
-import { LogOut, Menu } from 'lucide-react';
+import PropTypes from 'prop-types';
+import { LogOut } from 'lucide-react';
 import { logout } from '../utils/auth';
 import Logo from './Logo';
 
@@ -70,3 +71,12 @@ const Navbar = ({ user, onSignOut }) => {
 };
 
 export default Navbar;
+
+Navbar.propTypes = {
+  user: PropTypes.shape({
+    displayName: PropTypes.string,
+    email: PropTypes.string,
+    photoURL: PropTypes.string,
+  }),
+  onSignOut: PropTypes.func.isRequired,
+};

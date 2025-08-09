@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Brain, TrendingUp, Zap, Target, Star, MessageSquare } from 'lucide-react';
 
 const FeedbackCard = ({ feedback, scores }) => {
@@ -55,6 +56,20 @@ const FeedbackCard = ({ feedback, scores }) => {
     return 'bg-red-500/20';
   };
 
+  const getOverallLabel = (total) => {
+    if (total >= 32) return 'Excellent';
+    if (total >= 24) return 'Very Good';
+    if (total >= 16) return 'Good';
+    return 'Needs Improvement';
+  };
+
+  const barGradient = (score) => {
+    if (score >= 8) return 'from-green-500 to-green-400';
+    if (score >= 6) return 'from-yellow-500 to-yellow-400';
+    if (score >= 4) return 'from-orange-500 to-orange-400';
+    return 'from-red-500 to-red-400';
+  };
+
   return (
     <section className="py-12 px-4 sm:px-6 lg:px-8" id="feedback">
       <div className="max-w-4xl mx-auto">
@@ -84,9 +99,7 @@ const FeedbackCard = ({ feedback, scores }) => {
             </div>
             <div className={`inline-block px-4 py-2 rounded-full mt-4 ${getScoreBgColor(scores.totalScore)}`}>
               <span className={`font-medium ${getScoreColor(scores.totalScore)}`}>
-                {scores.totalScore >= 32 ? 'Excellent' : 
-                 scores.totalScore >= 24 ? 'Very Good' :
-                 scores.totalScore >= 16 ? 'Good' : 'Needs Improvement'}
+                {getOverallLabel(scores.totalScore)}
               </span>
             </div>
           </div>
@@ -159,12 +172,7 @@ const FeedbackCard = ({ feedback, scores }) => {
                     <div className="flex-1">
                       <div className="h-2 bg-dark-700 rounded-full overflow-hidden">
                         <div 
-                          className={`h-full bg-gradient-to-r ${
-                            score >= 8 ? 'from-green-500 to-green-400' :
-                            score >= 6 ? 'from-yellow-500 to-yellow-400' :
-                            score >= 4 ? 'from-orange-500 to-orange-400' :
-                            'from-red-500 to-red-400'
-                          } transition-all duration-1000 ease-out`}
+                          className={`h-full bg-gradient-to-r ${barGradient(score)} transition-all duration-1000 ease-out`}
                           style={{ width: `${percentage}%` }}
                         ></div>
                       </div>
@@ -184,3 +192,16 @@ const FeedbackCard = ({ feedback, scores }) => {
 };
 
 export default FeedbackCard;
+
+FeedbackCard.propTypes = {
+  feedback: PropTypes.shape({
+    feedback: PropTypes.string,
+  }),
+  scores: PropTypes.shape({
+    feasibility: PropTypes.number,
+    originality: PropTypes.number,
+    scalability: PropTypes.number,
+    impact: PropTypes.number,
+    totalScore: PropTypes.number,
+  }),
+};

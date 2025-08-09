@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import { Send, Lightbulb, AlertCircle, CheckCircle } from 'lucide-react';
 import { submitIdea } from '../utils/api';
 import { saveFeedback, saveScores } from '../utils/storage';
@@ -105,10 +106,11 @@ const IdeaSubmissionForm = ({ userProfile, onSubmissionSuccess }) => {
 
             {/* Idea Input */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="idea" className="block text-sm font-medium text-gray-300 mb-2">
                 Your Business Idea
               </label>
               <textarea
+                id="idea"
                 value={idea}
                 onChange={(e) => setIdea(e.target.value)}
                 placeholder="Describe your innovative business idea in detail. What problem does it solve? Who is your target audience? What makes it unique? How would you implement it?"
@@ -190,3 +192,13 @@ const IdeaSubmissionForm = ({ userProfile, onSubmissionSuccess }) => {
 };
 
 export default IdeaSubmissionForm;
+
+IdeaSubmissionForm.propTypes = {
+  userProfile: PropTypes.shape({
+    uid: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    branch: PropTypes.string.isRequired,
+    rollNumber: PropTypes.string.isRequired,
+  }).isRequired,
+  onSubmissionSuccess: PropTypes.func.isRequired,
+};

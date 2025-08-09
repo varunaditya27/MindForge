@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Chrome, AlertCircle } from 'lucide-react';
+import PropTypes from 'prop-types';
+import { Globe, AlertCircle } from 'lucide-react';
 import { signInWithGoogle } from '../utils/auth';
 import Logo from './Logo';
 
@@ -74,7 +75,7 @@ const Login = ({ onLoginSuccess }) => {
               </div>
             ) : (
               <>
-                <Chrome className="w-5 h-5" />
+                <Globe className="w-5 h-5" />
                 <span>Continue with Google</span>
               </>
             )}
@@ -96,8 +97,8 @@ const Login = ({ onLoginSuccess }) => {
               <div className="text-xs text-gray-500">Gemini Evaluation</div>
             </div>
             <div>
-              <div className="text-navy-400 font-semibold">Real-time</div>
-              <div className="text-xs text-gray-500">Live Leaderboard</div>
+              <div className="text-navy-400 font-semibold">Live</div>
+              <div className="text-xs text-gray-500">Auto-updating Leaderboard</div>
             </div>
             <div>
               <div className="text-navy-400 font-semibold">Instant</div>
@@ -111,3 +112,7 @@ const Login = ({ onLoginSuccess }) => {
 };
 
 export default Login;
+
+Login.propTypes = {
+  onLoginSuccess: PropTypes.func.isRequired,
+};

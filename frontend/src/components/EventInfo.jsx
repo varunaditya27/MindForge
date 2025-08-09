@@ -1,4 +1,5 @@
 import React from 'react';
+// no props
 import { Lightbulb, Target, Trophy, Zap } from 'lucide-react';
 
 const EventInfo = () => {
@@ -21,7 +22,7 @@ const EventInfo = () => {
     {
       icon: Trophy,
       title: "Live Leaderboard",
-      description: "Compete in real-time with peers"
+  description: "Compete live with peers"
     }
   ];
 
@@ -41,9 +42,9 @@ const EventInfo = () => {
 
         {/* Features Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {features.map((feature, index) => (
+          {features.map((feature) => (
             <div 
-              key={index}
+              key={feature.title}
               className="bg-dark-800/50 rounded-xl p-6 border border-navy-800 hover:border-navy-600 transition-all duration-300 hover:transform hover:scale-105 card-glow"
             >
               <div className="flex flex-col items-center text-center">

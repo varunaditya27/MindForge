@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { Trophy, Medal, Award, Users, Crown, TrendingUp } from 'lucide-react';
-import { database } from '../firebase_config';
-import { ref, onValue, off } from 'firebase/database';
+import { getLeaderboard } from '../utils/api';
 
 const Leaderboard = ({ currentUser }) => {
   const [leaderboardData, setLeaderboardData] = useState([]);
@@ -9,38 +9,29 @@ const Leaderboard = ({ currentUser }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const leaderboardRef = ref(database, 'leaderboard');
-    
-    const unsubscribe = onValue(leaderboardRef, (snapshot) => {
-      try {
-        const data = snapshot.val();
-        if (data) {
-          // Convert object to array and sort by score
-          const leaderboardArray = Object.entries(data).map(([uid, userData]) => ({
-            uid,
-            ...userData
-          })).sort((a, b) => b.score - a.score);
-          
-          setLeaderboardData(leaderboardArray);
-        } else {
-          setLeaderboardData([]);
-        }
-        setError(null);
-      } catch (err) {
-        console.error('Error processing leaderboard data:', err);
-        setError('Error loading leaderboard data');
-      } finally {
-        setIsLoading(false);
-      }
-    }, (error) => {
-      console.error('Firebase leaderboard error:', error);
-      setError('Failed to connect to leaderboard');
-      setIsLoading(false);
-    });
+    let timerId;
 
-    return () => {
-      off(leaderboardRef, 'value', unsubscribe);
+    const fetchData = async () => {
+      const result = await getLeaderboard();
+      if (result.success && Array.isArray(result.data)) {
+        setLeaderboardData(result.data);
+        setError(null);
+      } else if (result.success && result.data && typeof result.data === 'object') {
+        // In case backend returns an object map
+        const arr = Object.entries(result.data).map(([uid, userData]) => ({ uid, ...userData }))
+          .sort((a, b) => b.score - a.score);
+        setLeaderboardData(arr);
+        setError(null);
+      } else {
+        setError(result.error || 'Error loading leaderboard');
+      }
+      setIsLoading(false);
     };
+
+    fetchData();
+    timerId = setInterval(fetchData, 5000); // poll every 5s
+
+    return () => clearInterval(timerId);
   }, []);
 
   const getRankIcon = (rank) => {
@@ -95,8 +86,8 @@ const Leaderboard = ({ currentUser }) => {
           </div>
           <div className="bg-dark-800/50 backdrop-blur-sm rounded-2xl p-8 border border-navy-800 card-glow">
             <div className="animate-pulse space-y-4">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-16 bg-dark-700 rounded-lg"></div>
+              {['s1','s2','s3','s4','s5'].map((k) => (
+                <div key={k} className="h-16 bg-dark-700 rounded-lg"></div>
               ))}
             </div>
           </div>
@@ -231,7 +222,7 @@ const Leaderboard = ({ currentUser }) => {
         {/* Update Info */}
         <div className="mt-6 text-center">
           <p className="text-xs text-gray-500">
-            🔄 Leaderboard updates in real-time as new ideas are submitted
+            🔄 Leaderboard auto-refreshes every few seconds as new ideas are submitted
           </p>
         </div>
       </div>
@@ -240,3 +231,9 @@ const Leaderboard = ({ currentUser }) => {
 };
 
 export default Leaderboard;
+
+Leaderboard.propTypes = {
+  currentUser: PropTypes.shape({
+    uid: PropTypes.string,
+  }),
+};
