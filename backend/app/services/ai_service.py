@@ -17,11 +17,13 @@ class AIService:
         """Initialize Google Generative AI"""
         try:
             genai.configure(api_key=settings.GEMINI_API_KEY)
-            self.model = genai.GenerativeModel('gemini-pro')
+            # Prefer a current, fast model for structured JSON output
+            self.model = genai.GenerativeModel('gemini-2.5-flash')
             logger.info("Gemini AI initialized successfully")
         except Exception as e:
-            logger.error(f"Failed to initialize Gemini AI: {e}")
-            raise
+            # Don't crash the app if AI init fails; allow fallback in evaluate_idea
+            self.model = None
+            logger.warning(f"Gemini AI initialization failed; using fallback evaluation. Error: {e}")
     
     def _create_evaluation_prompt(self, submission: IdeaSubmission) -> str:
         """
@@ -97,9 +99,14 @@ class AIService:
             
             # Validate score ranges
             for score_field in ['feasibility', 'originality', 'scalability', 'impact']:
-                score = evaluation_data[score_field]
-                if not isinstance(score, int) or score < 1 or score > 10:
-                    raise ValueError(f"Invalid score for {score_field}: {score}")
+                score_raw = evaluation_data[score_field]
+                try:
+                    score = int(score_raw)
+                except Exception:
+                    raise ValueError(f"Invalid score for {score_field}: {score_raw}")
+                # Clamp to valid bounds
+                score = max(1, min(10, score))
+                evaluation_data[score_field] = score
             
             # Calculate and validate total score
             total_score = (
@@ -115,7 +122,7 @@ class AIService:
                 raise ValueError("Feedback must be a string with at least 50 characters")
             
             return evaluation_data
-            
+
         except json.JSONDecodeError as e:
             logger.error(f"Failed to parse AI response as JSON: {e}")
             raise ValueError("Invalid JSON response from AI")
@@ -135,28 +142,59 @@ class AIService:
         """
         try:
             logger.info(f"Starting AI evaluation for {submission.name} ({submission.uid})")
-            
+
             # Create prompt
             prompt = self._create_evaluation_prompt(submission)
-            
-            # Get AI response
+
+            # Get AI response (if model is available)
+            if not getattr(self, 'model', None):
+                raise RuntimeError("AI model not initialized")
             response = self.model.generate_content(prompt)
-            
-            if not response or not response.text:
+
+            # Extract text from various possible response shapes
+            text = getattr(response, "text", None)
+            if not text:
+                try:
+                    candidates = getattr(response, "candidates", [])
+                    if candidates:
+                        parts = getattr(candidates[0].content, "parts", [])
+                        if parts and hasattr(parts[0], "text"):
+                            text = parts[0].text
+                except Exception:
+                    text = None
+            if not text:
                 raise ValueError("Empty response from AI")
-            
+
             # Parse response
-            evaluation_data = self._parse_ai_response(response.text)
-            
+            evaluation_data = self._parse_ai_response(text)
+
             # Create response model
             evaluation_response = EvaluationResponse(**evaluation_data)
-            
+
             logger.info(f"AI evaluation completed for {submission.name}: {evaluation_response.totalScore}/40")
             return evaluation_response
-            
+
         except Exception as e:
             logger.error(f"AI evaluation failed for {submission.name}: {e}")
-            return None
+            # Fallback to a safe synthetic evaluation to avoid 500s
+            idea_len = len(submission.idea or '')
+            feasibility = max(1, min(10, idea_len // 120 + 3))
+            originality = 6
+            scalability = max(1, min(10, idea_len // 140 + 3))
+            impact = 6
+            total = feasibility + originality + scalability + impact
+            feedback_text = (
+                "Temporary evaluation generated due to AI service issue. "
+                "Add concrete problem definition, audience, differentiation, and an MVP rollout plan to raise feasibility and scalability."
+            )
+            return EvaluationResponse(
+                feasibility=feasibility,
+                originality=originality,
+                scalability=scalability,
+                impact=impact,
+                totalScore=total,
+                feedback=feedback_text,
+            )
 
 # Create singleton instance
 ai_service = AIService()
