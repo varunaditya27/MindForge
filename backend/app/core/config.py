@@ -26,7 +26,6 @@ class Settings:
     
     # Firebase Settings
     FIREBASE_PROJECT_ID: str = os.getenv("FIREBASE_PROJECT_ID", "")
-    FIREBASE_DATABASE_URL: str = os.getenv("FIREBASE_DATABASE_URL", "")
     FIREBASE_SERVICE_ACCOUNT_KEY: str = os.getenv("FIREBASE_SERVICE_ACCOUNT_KEY", "firebase_admin_sdk.json")
     
     # Validation
@@ -34,8 +33,7 @@ class Settings:
         """Validate that all required settings are present"""
         if not self.GEMINI_API_KEY:
             raise ValueError("GEMINI_API_KEY environment variable is required")
-        if not self.FIREBASE_DATABASE_URL:
-            raise ValueError("FIREBASE_DATABASE_URL environment variable is required")
+    # Firestore does not require a database URL
 
 # Create settings instance
 settings = Settings()
