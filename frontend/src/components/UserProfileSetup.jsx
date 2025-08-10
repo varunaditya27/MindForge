@@ -11,18 +11,19 @@ const UserProfileSetup = ({ user, onProfileComplete }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const branches = [
-    'Computer Science and Engineering (CSE)',
-    'Information Science and Engineering (ISE)',
-    'Electronics and Communication Engineering (ECE)',
-    'Electrical and Electronics Engineering (EEE)',
+    'Computer Science and Engineering (CS)',
+    'Computer Science and Engineering - Data Science (CD)',
+    'Computer Science and Engineering - Cyber Security (CY)',
+    'Computer Science and Engineering - Artificial Intelligence and Machine Learning (CI)',
+    'Electronics and Communication Engineering (EC)',
+    'Electrical and Electronics Engineering (EE)',
+    'Electronics and Telecommunication Engineering (ET)',
     'Mechanical Engineering (ME)',
     'Civil Engineering (CE)',
     'Chemical Engineering (CHE)',
     'Biotechnology (BT)',
-    'Aerospace Engineering (AE)',
     'Industrial Engineering and Management (IEM)',
-    'Electronics and Instrumentation Engineering (EIE)',
-    'Medical Electronics Engineering (MEE)'
+    'Aerospace Engineering (AS)',
   ];
 
   const handleInputChange = (e) => {
@@ -133,7 +134,7 @@ const UserProfileSetup = ({ user, onProfileComplete }) => {
                 name="rollNumber"
                 value={formData.rollNumber}
                 onChange={handleInputChange}
-                placeholder="e.g., 1RV21CS001"
+                placeholder="e.g., RVCE25BCS001"
                 className="w-full bg-dark-700 border border-navy-700 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:ring-2 focus:ring-navy-500 focus:border-transparent transition-all duration-200"
                 required
               />
