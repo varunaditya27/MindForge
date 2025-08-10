@@ -19,10 +19,10 @@ const UserProfileSetup = ({ user, onProfileComplete }) => {
     'Electrical and Electronics Engineering (EE)',
     'Electronics and Telecommunication Engineering (ET)',
     'Mechanical Engineering (ME)',
-    'Civil Engineering (CE)',
-    'Chemical Engineering (CHE)',
+    'Civil Engineering (CV)',
+    'Chemical Engineering (CH)',
     'Biotechnology (BT)',
-    'Industrial Engineering and Management (IEM)',
+    'Industrial Engineering and Management (IM)',
     'Aerospace Engineering (AS)',
   ];
 
