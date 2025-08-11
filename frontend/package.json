@@ -10,9 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "canvas-confetti": "^1.9.3",
     "firebase": "^12.1.0",
-  "prop-types": "^15.8.1",
     "lucide-react": "^0.539.0",
+    "prop-types": "^15.8.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1"
   },
