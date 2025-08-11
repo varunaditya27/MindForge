@@ -58,3 +58,5 @@ class UserProfile(BaseModel):
     createdAt: Optional[str] = Field(None, description="ISO timestamp when created")
     updatedAt: Optional[str] = Field(None, description="ISO timestamp when updated")
     lastEvaluation: Optional[EvaluationResponse] = Field(None, description="Most recent AI evaluation")
+    # Submission tracking (single round)
+    hasSubmitted: Optional[bool] = Field(False, description="Has submitted their idea")
