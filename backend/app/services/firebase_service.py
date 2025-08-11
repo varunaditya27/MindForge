@@ -164,5 +164,26 @@ class FirebaseService:
             logger.error(f"Failed to fetch user profile for {uid}: {e}")
             return None
 
+    # Idea persistence (private)
+    def save_user_idea(self, uid: str, data: Dict[str, Any]) -> bool:
+        """Save the raw idea under users/{uid}/ideas/{round} with timestamp"""
+        if not self._firebase_available:
+            logger.warning("Firebase not available, skipping idea save")
+            return False
+        try:
+            round_id = str(data.get('round') or '1')
+            doc_ref = self._db.collection('users').document(uid).collection('ideas').document(round_id)
+            payload = {
+                'idea': data.get('idea', ''),
+                'round': round_id,
+                'createdAt': firestore.SERVER_TIMESTAMP,
+            }
+            doc_ref.set(payload)
+            logger.info(f"Saved idea for user {uid} round {round_id}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to save idea for {uid}: {e}")
+            return False
+
 # Create singleton instance
 firebase_service = FirebaseService()

@@ -55,6 +55,8 @@ export const getLeaderboard = async () => {
   }
 };
 
+// Single round only; no round API needed
+
 export const upsertUserProfile = async (profile) => {
   try {
     const response = await fetch(`${API_BASE_URL}/users/profile`, {
