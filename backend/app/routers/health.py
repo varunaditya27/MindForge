@@ -1,6 +1,7 @@
 from fastapi import APIRouter
-from datetime import datetime
+from datetime import datetime, timezone
 from ..models.schemas import HealthResponse, APIResponse
+from ..core.config import settings
 
 router = APIRouter(prefix="", tags=["health"])
 
@@ -19,5 +20,10 @@ async def health_check():
     return HealthResponse(
         status="healthy",
         message="API is running successfully",
-        timestamp=datetime.utcnow().isoformat()
+        timestamp=datetime.now(timezone.utc).isoformat()
     )
+
+@router.get("/config/round", response_model=APIResponse)
+async def current_round():
+    """Expose current round number for clients"""
+    return APIResponse(status="success", message="OK", data={"currentRound": str(settings.CURRENT_ROUND)})

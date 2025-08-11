@@ -22,6 +22,14 @@ async def submit_idea(submission: IdeaSubmission):
     """
     try:
         logger.info(f"Received submission from {submission.name} ({submission.uid})")
+
+        # Prevent duplicate submissions (single round only)
+        try:
+            existing_profile = firebase_service.get_user_profile(submission.uid) or {}
+        except Exception:
+            existing_profile = {}
+        if existing_profile.get("hasSubmitted"):
+            raise HTTPException(status_code=400, detail="Already submitted")
         
         # Evaluate idea with AI
         evaluation = ai_service.evaluate_idea(submission)
@@ -31,7 +39,16 @@ async def submit_idea(submission: IdeaSubmission):
                 detail="Failed to evaluate idea with AI. Please try again."
             )
         
-    # Prepare leaderboard data (0-100)
+    # Persist submitted idea (private, per-user)
+        try:
+            firebase_service.save_user_idea(submission.uid, {
+        'round': '1',
+                'idea': submission.idea,
+            })
+        except Exception:
+            pass
+
+        # Prepare leaderboard data (0-100)
         leaderboard_data = {
             'name': submission.name,
             'branch': submission.branch,
@@ -48,12 +65,16 @@ async def submit_idea(submission: IdeaSubmission):
         # Also upsert user profile so branch and rollNumber persist server-side,
         # and store lastEvaluation for cross-device/account switching
         try:
+            prev_best = (existing_profile or {}).get('personalBestScore')
+            personal_best = max(prev_best or 0, evaluation.totalScore)
             payload = {
                 'uid': submission.uid,
                 'name': submission.name,
                 'branch': submission.branch,
                 'rollNumber': submission.rollNumber,
                 'lastEvaluation': evaluation.model_dump(),
+                'hasSubmitted': True,
+                'personalBestScore': personal_best,
             }
             firebase_service.upsert_user_profile(submission.uid, payload)
         except Exception:
