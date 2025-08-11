@@ -13,6 +13,7 @@ import IdeaSubmissionForm from './components/IdeaSubmissionForm';
 import FeedbackCard from './components/FeedbackCard';
 import Leaderboard from './components/Leaderboard';
 import Logo from './components/Logo';
+import AIFunFactBar from './components/AIFunFactBar';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -20,6 +21,8 @@ function App() {
   const [feedback, setFeedback] = useState(null);
   const [scores, setScores] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [hasSubmittedThisRound, setHasSubmittedThisRound] = useState(false);
+  // Single round submission
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -61,6 +64,8 @@ function App() {
                   totalScore: ev.totalScore,
                 });
               }
+              // Derive submission status (single round)
+              setHasSubmittedThisRound(Boolean(res.data.hasSubmitted));
             } else if (!savedProfile) {
               // Create minimal profile if not existing server-side
               const minimal = {
@@ -86,6 +91,7 @@ function App() {
         setUserProfile(null);
         setFeedback(null);
         setScores(null);
+        setHasSubmittedThisRound(false);
       }
       setLoading(false);
     });
@@ -131,6 +137,16 @@ function App() {
   riskMitigation: submissionResult.riskMitigation,
       totalScore: submissionResult.totalScore
     });
+    setHasSubmittedThisRound(true);
+  };
+
+  const handleEnterTop3 = async () => {
+    try {
+      const confetti = (await import('canvas-confetti')).default;
+      confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
+    } catch {
+      // ignore if confetti not available
+    }
   };
 
   if (loading) {
@@ -180,17 +196,36 @@ function App() {
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <EventInfo />
 
+          <AIFunFactBar />
+
           <div className="grid grid-cols-1 gap-8">
-            <IdeaSubmissionForm
-              userProfile={userProfile}
-              onSubmissionSuccess={handleSubmissionSuccess}
-            />
+            {!hasSubmittedThisRound ? (
+              <IdeaSubmissionForm
+                userProfile={userProfile}
+                onSubmissionSuccess={handleSubmissionSuccess}
+              />
+            ) : (
+              <section className="py-6">
+                <div className="max-w-2xl mx-auto">
+                  <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-6">
+                    <div className="flex items-center justify-between">
+                      <p className="text-amber-300 font-medium">
+                        You’ve submitted — wait for Round 2.
+                      </p>
+                      {scores?.totalScore != null && (
+                        <span className="text-amber-200 text-sm">Last score: {scores.totalScore}/100</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
 
             {feedback && scores && (
               <FeedbackCard feedback={feedback} scores={scores} />
             )}
 
-            <Leaderboard currentUser={user} />
+            <Leaderboard currentUser={user} onEnterTop3={handleEnterTop3} />
           </div>
         </main>
 

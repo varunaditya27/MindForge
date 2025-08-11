@@ -179,6 +179,11 @@ const IdeaSubmissionForm = ({ userProfile, onSubmissionSuccess }) => {
                 </>
               )}
             </button>
+            {isSubmitting && (
+              <div className="mt-4 flex items-center justify-center text-navy-300 text-sm animate-pulse">
+                <span className="mr-2">🤖</span> AI is thinking...
+              </div>
+            )}
           </form>
 
           {/* Tips */}

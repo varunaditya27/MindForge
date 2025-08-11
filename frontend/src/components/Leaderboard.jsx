@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Trophy, Medal, Award, Users, Crown, TrendingUp } from 'lucide-react';
 import { getLeaderboard } from '../utils/api';
 
-const Leaderboard = ({ currentUser }) => {
+const Leaderboard = ({ currentUser, onEnterTop3 }) => {
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -20,7 +20,7 @@ const Leaderboard = ({ currentUser }) => {
         // In case backend returns an object map
         const arr = Object.entries(result.data).map(([uid, userData]) => ({ uid, ...userData }))
           .sort((a, b) => b.score - a.score);
-        setLeaderboardData(arr);
+  setLeaderboardData(arr);
         setError(null);
       } else {
         setError(result.error || 'Error loading leaderboard');
@@ -68,6 +68,11 @@ const Leaderboard = ({ currentUser }) => {
   };
 
   const currentUserRank = leaderboardData.findIndex(entry => entry.uid === currentUser?.uid) + 1;
+  useEffect(() => {
+    if (currentUserRank > 0 && currentUserRank <= 3 && typeof onEnterTop3 === 'function') {
+      onEnterTop3(currentUserRank);
+    }
+  }, [currentUserRank, onEnterTop3]);
 
   if (isLoading) {
     return (
@@ -236,4 +241,5 @@ Leaderboard.propTypes = {
   currentUser: PropTypes.shape({
     uid: PropTypes.string,
   }),
+  onEnterTop3: PropTypes.func,
 };
