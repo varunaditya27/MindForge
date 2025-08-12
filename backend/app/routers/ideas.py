@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 import logging
 from ..models.schemas import IdeaSubmission, EvaluationResponse
 from ..services import ai_service, firebase_service
+from ..services.agent_service import agent_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/ideas", tags=["ideas"])
@@ -31,8 +32,12 @@ async def submit_idea(submission: IdeaSubmission):
         if existing_profile.get("hasSubmitted"):
             raise HTTPException(status_code=400, detail="Already submitted")
         
-        # Evaluate idea with AI
-        evaluation = ai_service.evaluate_idea(submission)
+        # Try agentic evaluation first (web-augmented), then fallback to static
+        evaluation = agent_service.evaluate(submission)
+        logger.info(f"Agentic evaluation result: {evaluation}")
+        if not evaluation:
+            evaluation = ai_service.evaluate_idea(submission)
+            print("Agentic evaluation failed, falling back to static evaluation.")
         if not evaluation:
             raise HTTPException(
                 status_code=500, 
