@@ -27,6 +27,9 @@ class Settings:
     
     # External API Keys
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+    # Optional: Google Programmable Search Engine (CSE) for web search (free tier)
+    GOOGLE_CSE_API_KEY: str = os.getenv("GOOGLE_CSE_API_KEY", "")
+    GOOGLE_CSE_CX: str = os.getenv("GOOGLE_CSE_CX", "")
     
     # Firebase Settings (split credentials only)
     FIREBASE_PROJECT_ID: str = os.getenv("FIREBASE_PROJECT_ID", "")
