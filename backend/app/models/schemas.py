@@ -12,19 +12,18 @@ class IdeaSubmission(BaseModel):
     idea: str = Field(..., min_length=50, max_length=2000, description="Business idea description")
 
 class EvaluationResponse(BaseModel):
-    """Model for AI evaluation response (10 criteria, each 1-100; totalScore is average 1-100)"""
-    problemClarity: int = Field(..., ge=1, le=100, description="How clear and specific is the problem definition")
-    originality: int = Field(..., ge=1, le=100, description="Novelty and differentiation")
-    feasibility: int = Field(..., ge=1, le=100, description="Technical and practical feasibility")
-    technicalComplexity: int = Field(..., ge=1, le=100, description="Depth of technical approach")
-    scalability: int = Field(..., ge=1, le=100, description="Ability to scale the solution")
-    marketSize: int = Field(..., ge=1, le=100, description="Reach and size of target market")
-    businessModel: int = Field(..., ge=1, le=100, description="Clarity and viability of monetization")
-    impact: int = Field(..., ge=1, le=100, description="Societal/user impact")
-    executionPlan: int = Field(..., ge=1, le=100, description="Roadmap and MVP readiness")
-    riskMitigation: int = Field(..., ge=1, le=100, description="Awareness and mitigation of key risks")
-    totalScore: int = Field(..., ge=1, le=100, description="Overall score (average of criteria, 1-100)")
-    feedback: str = Field(..., min_length=50, description="Detailed AI feedback")
+    """Primary evaluation response (new 2025 criteria only).
+
+    The model returns the five atomic dimensions. We compute totalScore server-side
+    as a simple rounded average (0-100) for leaderboard use.
+    """
+    aiRelevance: int = Field(..., ge=0, le=100, description="Centrality & plausibility of AI usage")
+    creativity: int = Field(..., ge=0, le=100, description="Originality / novelty")
+    impact: int = Field(..., ge=0, le=100, description="Real-world benefit & timeliness")
+    clarity: int = Field(..., ge=0, le=100, description="Pitch clarity (~50 words, structure)")
+    funFactor: int = Field(..., ge=0, le=100, description="Delight / wow / memorability")
+    totalScore: int = Field(..., ge=0, le=100, description="Aggregate (average of 5 dimensions, rounded)")
+    feedback: str = Field(..., min_length=50, description="Strengths + improvements (concise)")
     evaluatedAt: Optional[str] = Field(None, description="ISO timestamp when evaluated")
 
 class LeaderboardEntry(BaseModel):
