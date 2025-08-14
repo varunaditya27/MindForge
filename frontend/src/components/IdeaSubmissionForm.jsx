@@ -9,6 +9,8 @@ const IdeaSubmissionForm = ({ userProfile, onSubmissionSuccess }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [jobId, setJobId] = useState(null);
+  // Track if the idea has completed evaluation BEFORE any effects reference it
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [progressMsg, setProgressMsg] = useState('Queuing your idea...');
   const progressMessages = useMemo(() => ([
     'Queued for evaluation...',
@@ -29,7 +31,6 @@ const IdeaSubmissionForm = ({ userProfile, onSubmissionSuccess }) => {
     }, 3000);
     return () => clearInterval(interval);
   }, [isSubmitting, isSubmitted, progressMessages]);
-  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -97,8 +98,7 @@ const IdeaSubmissionForm = ({ userProfile, onSubmissionSuccess }) => {
       setTimeout(poll, 2500);
     };
     poll();
-
-    setIsSubmitting(false);
+  // Do NOT set isSubmitting false yet; keep loading state until poll resolves
   };
 
   const characterCount = idea.length;
