@@ -1,13 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { Send, Lightbulb, AlertCircle, CheckCircle } from 'lucide-react';
-import { submitIdea } from '../utils/api';
+import { submitIdeaAsync, getIdeaJobStatus } from '../utils/api';
 import { saveFeedback, saveScores } from '../utils/storage';
 
 const IdeaSubmissionForm = ({ userProfile, onSubmissionSuccess }) => {
   const [idea, setIdea] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [jobId, setJobId] = useState(null);
+  const [progressMsg, setProgressMsg] = useState('Queuing your idea...');
+  const progressMessages = useMemo(() => ([
+    'Queued for evaluation...',
+    'Gathering market signals...',
+    'Scanning competitors & feasibility...',
+    'Synthesizing context...',
+  'Scoring core dimensions...',
+    'Generating actionable feedback...',
+    'Finalizing JSON response...'
+  ]), []);
+  // Rotate messages every few seconds while waiting
+  useEffect(() => {
+    if (!isSubmitting || isSubmitted) return;
+    let idx = 0;
+    const interval = setInterval(() => {
+      idx = (idx + 1) % progressMessages.length;
+      setProgressMsg(progressMessages[idx]);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [isSubmitting, isSubmitted, progressMessages]);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -29,31 +50,53 @@ const IdeaSubmissionForm = ({ userProfile, onSubmissionSuccess }) => {
       idea: idea.trim()
     };
 
-    const result = await submitIdea(submissionData);
-
-    if (result.success) {
-  // Save feedback and scores to localStorage (per-user)
-  const userKey = userProfile.email || userProfile.uid;
-  saveFeedback(result.data, userKey);
-      saveScores({
-        problemClarity: result.data.problemClarity,
-        originality: result.data.originality,
-        feasibility: result.data.feasibility,
-        technicalComplexity: result.data.technicalComplexity,
-        scalability: result.data.scalability,
-        marketSize: result.data.marketSize,
-        businessModel: result.data.businessModel,
-        impact: result.data.impact,
-        executionPlan: result.data.executionPlan,
-        riskMitigation: result.data.riskMitigation,
-        totalScore: result.data.totalScore
-      }, userKey);
-
-      setIsSubmitted(true);
-      onSubmissionSuccess(result.data);
-    } else {
-      setError(result.error || 'Failed to submit idea. Please try again.');
+    // Enqueue
+    const enqueue = await submitIdeaAsync(submissionData);
+    if (!enqueue.success) {
+      setError(enqueue.error || 'Failed to enqueue idea.');
+      setIsSubmitting(false);
+      return;
     }
+    setJobId(enqueue.data.jobId);
+  setProgressMsg(progressMessages[0]);
+
+    // Poll job status
+    const userKey = userProfile.email || userProfile.uid;
+    const poll = async () => {
+      if (!enqueue.data.jobId) return;
+      const statusRes = await getIdeaJobStatus(enqueue.data.jobId);
+      if (!statusRes.success) {
+        setError(statusRes.error || 'Status check failed');
+        setIsSubmitting(false);
+        return;
+      }
+      const { status, result, error: jobError } = statusRes.data;
+      if (status === 'error') {
+        setError(jobError || 'Evaluation failed');
+        setIsSubmitting(false);
+        return;
+      }
+      if (status === 'done' && result) {
+        // Persist
+        saveFeedback({ feedback: result.feedback }, userKey);
+        const scoresPayload = {
+          aiRelevance: result.aiRelevance,
+          creativity: result.creativity,
+          impact: result.impact,
+          clarity: result.clarity,
+          funFactor: result.funFactor,
+          totalScore: result.totalScore,
+        };
+        saveScores(scoresPayload, userKey);
+        setIsSubmitted(true);
+        onSubmissionSuccess(result);
+        setIsSubmitting(false);
+        return;
+      }
+      // still pending / processing
+      setTimeout(poll, 2500);
+    };
+    poll();
 
     setIsSubmitting(false);
   };
@@ -170,7 +213,7 @@ const IdeaSubmissionForm = ({ userProfile, onSubmissionSuccess }) => {
                     <div></div>
                     <div></div>
                   </div>
-                  <span>Evaluating your idea...</span>
+                  <span>{progressMsg}</span>
                 </>
               ) : (
                 <>
@@ -180,8 +223,12 @@ const IdeaSubmissionForm = ({ userProfile, onSubmissionSuccess }) => {
               )}
             </button>
             {isSubmitting && (
-              <div className="mt-4 flex items-center justify-center text-navy-300 text-sm animate-pulse">
-                <span className="mr-2">🤖</span> AI is thinking...
+              <div className="mt-4 flex flex-col items-center justify-center text-navy-300 text-sm animate-pulse space-y-1">
+                <div className="flex items-center space-x-2">
+                  <span className="mr-1">🤖</span>
+                  <span>{progressMsg}</span>
+                </div>
+                {jobId && <span className="text-xs text-navy-400/70">Job ID: {jobId.slice(0,8)}…</span>}
               </div>
             )}
           </form>
