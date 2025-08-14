@@ -5,6 +5,7 @@ from typing import Dict, Any, Optional
 from ..core.config import settings
 from ..models.schemas import IdeaSubmission, EvaluationResponse
 from datetime import datetime, timezone
+from .gemini_client import GeminiMultiKeyClient
 
 logger = logging.getLogger(__name__)
 
@@ -15,59 +16,114 @@ class AIService:
         self._initialize_genai()
     
     def _initialize_genai(self) -> None:
-        """Initialize Google Generative AI"""
+        """Initialize Google Generative AI (multi-key if provided)."""
         try:
-            genai.configure(api_key=settings.GEMINI_API_KEY)
-            # Prefer a current, fast model for structured JSON output
-            self.model = genai.GenerativeModel('gemini-2.5-flash')
-            logger.info("Gemini AI initialized successfully")
+            if settings.GEMINI_API_KEYS:
+                self.multi_client = GeminiMultiKeyClient(settings.GEMINI_API_KEYS, 'gemini-2.5-flash')
+                self.model = None
+                logger.info("AIService using GeminiMultiKeyClient (round-robin keys)")
+            else:
+                genai.configure(api_key=settings.GEMINI_API_KEY)
+                # Prefer a current, fast model for structured JSON output
+                self.model = genai.GenerativeModel('gemini-2.5-flash')
+                self.multi_client = None
+                logger.info("Gemini AI initialized successfully (single key)")
         except Exception as e:
             # Don't crash the app if AI init fails; allow fallback in evaluate_idea
             self.model = None
+            self.multi_client = None
             logger.warning(f"Gemini AI initialization failed; using fallback evaluation. Error: {e}")
     
     def _create_evaluation_prompt(self, submission: IdeaSubmission) -> str:
-        """
-        Create a structured prompt for idea evaluation
-        """
-        prompt = (
-            "Evaluate the following business idea submitted by a college student for a coding event.\n\n"
-            f"Student: {submission.name}\n"
-            f"Branch: {submission.branch}\n"
-            f"Roll Number: {submission.rollNumber}\n\n"
-            "Business Idea:\n"
-            f"{submission.idea}\n\n"
-            "Score each of the following 10 criteria on a scale of 1-100 (integers only). "
-            "Then compute totalScore as the average of all 10 criteria (rounded to nearest integer), "
-            "clamped to 1-100. Be critical and specific:\n"
-            "- problemClarity: How clear and specific is the problem definition?\n"
-            "- originality: How novel and differentiated is the idea?\n"
-            "- feasibility: Is the solution technically and practically feasible?\n"
-            "- technicalComplexity: Depth and rigor of the proposed technical approach.\n"
-            "- scalability: Ability to scale to more users/markets.\n"
-            "- marketSize: Size and accessibility of the target market.\n"
-            "- businessModel: Clarity and viability of monetization.\n"
-            "- impact: Expected user/societal impact.\n"
-            "- executionPlan: Realism of roadmap and MVP readiness.\n"
-            "- riskMitigation: Awareness and mitigation of key risks.\n\n"
-            "Provide constructive feedback (2-3 paragraphs) covering strengths, specific weaknesses, and concrete next steps.\n\n"
-            "Respond ONLY in strict JSON (no markdown), with these exact keys (all integers 1-100):\n"
-            "{{\n"
-            '  "problemClarity": 1-100,\n'
-            '  "originality": 1-100,\n'
-            '  "feasibility": 1-100,\n'
-            '  "technicalComplexity": 1-100,\n'
-            '  "scalability": 1-100,\n'
-            '  "marketSize": 1-100,\n'
-            '  "businessModel": 1-100,\n'
-            '  "impact": 1-100,\n'
-            '  "executionPlan": 1-100,\n'
-            '  "riskMitigation": 1-100,\n'
-            '  "totalScore": 1-100,\n'
-            '  "feedback": "<2-3 paragraphs>"\n'
-            "}}\n"
+        # Expanded, highly instructive rubric-driven system prompt.
+        # NOTE: The downstream parser expects ONLY the 5 numeric criteria + feedback.
+        # The model MUST NOT add a totalScore or any extra fields.
+        return (
+            "You are IdeaArena Evaluator, an impartial judge for short (~50-word) creative AI idea pitches from college freshmen. "
+            "Return ONLY raw JSON (no Markdown fence, no commentary before/after). Do NOT include a total or any extra keys.\n\n"
+            "IDENTITY & SCOPE\n"
+            "- Be concise, analytical, and consistent with the rubric below.\n"
+            "- Never hallucinate facts or statistics; if uncertain, evaluate based on the text quality itself.\n\n"
+            f"SUBMISSION METADATA\nStudent: {submission.name}\nBranch: {submission.branch}\nRoll Number: {submission.rollNumber}\n\n"
+            f"PITCH (verbatim user text):\n{submission.idea}\n\n"
+            "RUBRIC (0–100 integers, evaluate EACH independently; DO NOT average or compute total):\n"
+            "aiRelevance & Applicability:\n"
+            "  0–39  AI absent / irrelevant / implausible.\n"
+            "  40–69 AI role present but generic OR partially impractical.\n"
+            "  70–89 AI is central, plausible with current tech.\n"
+            "  90–100 AI is core, technically sound, well-integrated.\n"
+            "creativity & Originality:\n"
+            "  0–39  Generic / overused pattern.\n"
+            "  40–69 Some novelty but predictable.\n"
+            "  70–89 Fresh twist; clever adaptation.\n"
+            "  90–100 Highly original; unexpected yet sensible.\n"
+            "impact (Real-World Benefit):\n"
+            "  0–39  No clear benefit / audience.\n"
+            "  40–69 Limited or niche value.\n"
+            "  70–89 Significant benefit for a defined group/sector.\n"
+            "  90–100 Major potential impact; timely / relevant.\n"
+            "clarity & Presentation (target length ~50 words):\n"
+            "  0–39  Confusing or incoherent.\n"
+            "  40–69 Understandable but incomplete / awkward.\n"
+            "  70–89 Clear problem + AI role + outcome.\n"
+            "  90–100 Crisp, engaging, plain language.\n"
+            "funFactor (Delight / Wow):\n"
+            "  0–39  Forgettable.\n"
+            "  40–69 Mildly interesting.\n"
+            "  70–89 Memorable & engaging.\n"
+            "  90–100 Standout; sparks excitement.\n\n"
+            "FEEDBACK REQUIREMENTS\n"
+            "- Provide a single string 50–800 chars.\n"
+            "- Structure: (a) Strengths / what's working; (b) Specific improvements / next step.\n"
+            "- Be actionable (avoid generic 'be more innovative').\n"
+            "- Avoid repeating the pitch verbatim; summarise.\n\n"
+            "OUTPUT FORMAT (STRICT JSON ONLY — NO MARKDOWN):\n"
+            "{\n  \"aiRelevance\": <0-100>,\n  \"creativity\": <0-100>,\n  \"impact\": <0-100>,\n  \"clarity\": <0-100>,\n  \"funFactor\": <0-100>,\n  \"feedback\": \"<50-800 chars>\"\n}\n"
+            "RULES\n"
+            "- No backticks, no trailing commas, no additional keys.\n"
+            "- All scores MUST be integers.\n"
+            "- Do NOT include explanations outside JSON.\n"
         )
-        return prompt
+
+    @staticmethod
+    def _extract_text_single(response) -> Optional[str]:
+        """Extract text from single-key response variants."""
+        text = getattr(response, "text", None)
+        if text:
+            return text
+        try:
+            candidates = getattr(response, "candidates", [])
+            if candidates:
+                parts = getattr(candidates[0].content, "parts", [])
+                if parts and hasattr(parts[0], "text"):
+                    return parts[0].text
+        except Exception:
+            return None
+        return None
+
+    @staticmethod
+    def _fallback_synthetic(submission: IdeaSubmission) -> EvaluationResponse:
+        idea_len = len(submission.idea or '')
+        base = max(15, min(70, idea_len // 25 + 15))
+        def clamp(v):
+            return max(0, min(100, v))
+        ai_rel = clamp(base + (idea_len % 7) - 3)
+        creativity = clamp(base + (idea_len % 11) - 5)
+        impact = clamp(base + (idea_len % 13) - 4)
+        clarity = clamp(base + (idea_len % 5) - 2)
+        fun = clamp(base + (idea_len % 9) - 4)
+        total = clamp(round((ai_rel + creativity + impact + clarity + fun)/5))
+        feedback_text = "Synthetic fallback: refine specificity, highlight AI differentiator, and quantify who benefits to improve impact & clarity."
+        return EvaluationResponse(
+            aiRelevance=ai_rel,
+            creativity=creativity,
+            impact=impact,
+            clarity=clarity,
+            funFactor=fun,
+            totalScore=total,
+            feedback=feedback_text,
+            evaluatedAt=datetime.now(timezone.utc).isoformat(),
+        )
     
     def _parse_ai_response(self, response_text: str) -> Dict[str, Any]:
         """
@@ -97,8 +153,7 @@ class AIService:
             
             # Validate required fields
             required_fields = [
-                'problemClarity','originality','feasibility','technicalComplexity','scalability',
-                'marketSize','businessModel','impact','executionPlan','riskMitigation','feedback'
+                'aiRelevance','creativity','impact','clarity','funFactor','feedback'
             ]
             for field in required_fields:
                 if field not in evaluation_data:
@@ -106,8 +161,7 @@ class AIService:
             
             # Validate score ranges for all criteria (1-100)
             for score_field in [
-                'problemClarity','originality','feasibility','technicalComplexity','scalability',
-                'marketSize','businessModel','impact','executionPlan','riskMitigation'
+                'aiRelevance','creativity','impact','clarity','funFactor'
             ]:
                 score_raw = evaluation_data[score_field]
                 try:
@@ -120,12 +174,10 @@ class AIService:
             
             # Calculate and validate total score (average of criteria)
             total_sum = sum([
-                evaluation_data['problemClarity'], evaluation_data['originality'], evaluation_data['feasibility'],
-                evaluation_data['technicalComplexity'], evaluation_data['scalability'], evaluation_data['marketSize'],
-                evaluation_data['businessModel'], evaluation_data['impact'], evaluation_data['executionPlan'],
-                evaluation_data['riskMitigation']
+                evaluation_data['aiRelevance'], evaluation_data['creativity'], evaluation_data['impact'],
+                evaluation_data['clarity'], evaluation_data['funFactor']
             ])
-            total_score = round(total_sum / 10)
+            total_score = round(total_sum / 5)
             total_score = max(1, min(100, total_score))
             evaluation_data['totalScore'] = total_score
             
@@ -161,22 +213,15 @@ class AIService:
             # Create prompt
             prompt = self._create_evaluation_prompt(submission)
 
-            # Get AI response (if model is available)
-            if not getattr(self, 'model', None):
-                raise RuntimeError("AI model not initialized")
-            response = self.model.generate_content(prompt)
-
-            # Extract text from various possible response shapes
-            text = getattr(response, "text", None)
-            if not text:
-                try:
-                    candidates = getattr(response, "candidates", [])
-                    if candidates:
-                        parts = getattr(candidates[0].content, "parts", [])
-                        if parts and hasattr(parts[0], "text"):
-                            text = parts[0].text
-                except Exception:
-                    text = None
+            # Get AI response (use multi-key if available)
+            if getattr(self, 'multi_client', None):
+                response = self.multi_client.generate(prompt)
+                text = self.multi_client.extract_text(response)
+            else:
+                if not getattr(self, 'model', None):
+                    raise RuntimeError("AI model not initialized")
+                response = self.model.generate_content(prompt)
+                text = self._extract_text_single(response)
             if not text:
                 raise ValueError("Empty response from AI")
 
@@ -191,46 +236,7 @@ class AIService:
 
         except Exception as e:
             logger.error(f"AI evaluation failed for {submission.name}: {e}")
-            # Fallback to a safe synthetic evaluation to avoid 500s
-            idea_len = len(submission.idea or '')
-            # Heuristic fallback across 10 criteria
-            # Heuristic fallback on 100-scale
-            base = max(20, min(85, idea_len // 20 + 20))
-            jitter = lambda n: max(1, min(100, n + (idea_len % 13) - 6))
-            problem_clarity = jitter(base)
-            originality = jitter(base - 5)
-            feasibility = jitter(base - 8)
-            technical_complexity = jitter(base - 10)
-            scalability = jitter(base - 7)
-            market_size = jitter(base - 4)
-            business_model = jitter(base - 6)
-            impact = jitter(base - 2)
-            execution_plan = jitter(base - 9)
-            risk_mitigation = jitter(base - 8)
-            total10 = sum([
-                problem_clarity, originality, feasibility, technical_complexity, scalability,
-                market_size, business_model, impact, execution_plan, risk_mitigation
-            ])
-            total = max(1, min(100, round(total10 / 10)))
-            feedback_text = (
-                "Temporary evaluation generated due to AI service issue. "
-                "Add concrete problem definition, audience, differentiation, and an MVP rollout plan to raise feasibility and scalability."
-            )
-            return EvaluationResponse(
-                problemClarity=problem_clarity,
-                originality=originality,
-                feasibility=feasibility,
-                technicalComplexity=technical_complexity,
-                scalability=scalability,
-                marketSize=market_size,
-                businessModel=business_model,
-                impact=impact,
-                executionPlan=execution_plan,
-                riskMitigation=risk_mitigation,
-                totalScore=total,
-                feedback=feedback_text,
-                evaluatedAt=datetime.now(timezone.utc).isoformat(),
-            )
+            return self._fallback_synthetic(submission)
 
 # Create singleton instance
 ai_service = AIService()
