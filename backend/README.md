@@ -21,7 +21,10 @@ backend/
 │   │   └── leaderboard.py     # Leaderboard endpoints
 │   └── services/
 │       ├── __init__.py
-│       ├── ai_service.py      # Gemini AI integration
+│       ├── ai_service.py       # Gemini AI integration (single or multi-key)
+│       ├── agent_service.py    # Web-augmented (Google CSE) agentic evaluation
+│       ├── gemini_client.py    # Round-robin Gemini multi-key wrapper
+│       ├── key_manager.py      # Thread-safe round-robin key manager
 │       └── firebase_service.py # Firebase Firestore operations
 ├── main.py                    # FastAPI application entry point
 ├── run.py                     # Development server script
@@ -127,9 +130,9 @@ The API will be available at `http://localhost:8000`
 4. Add your service account JSON as `backend/firebase_admin_sdk.json` or set `FIREBASE_SERVICE_ACCOUNT_KEY` to its path
 
 ### Gemini AI Setup
-1. Get API key from Google AI Studio
-2. Add to environment variables
-3. Configure model settings in `ai_service.py`
+1. Get API key(s) from Google AI Studio
+2. Add either GEMINI_API_KEY (single) or GEMINI_API_KEYS (comma-separated) in `.env`
+3. We automatically use round-robin across keys to reduce rate limits during the event
 
 ## 🔒 Security
 
@@ -168,6 +171,7 @@ Total score is the average of all 10 criteria (rounded, 1–100).
 - Structured prompts for consistent evaluation
 - JSON response format enforcement
 - Educational feedback generation
+- Optional agentic path: lightweight Google CSE search + context synthesis before Gemini
 
 ## 🚢 Deployment
 
