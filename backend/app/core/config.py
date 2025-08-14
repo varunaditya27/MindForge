@@ -27,6 +27,10 @@ class Settings:
     
     # External API Keys
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+    # Optional: multiple keys for bursty events (comma-separated)
+    GEMINI_API_KEYS: List[str] = [
+        k.strip() for k in os.getenv("GEMINI_API_KEYS", "").split(",") if k.strip()
+    ]
     # Optional: Google Programmable Search Engine (CSE) for web search (free tier)
     GOOGLE_CSE_API_KEY: str = os.getenv("GOOGLE_CSE_API_KEY", "")
     GOOGLE_CSE_CX: str = os.getenv("GOOGLE_CSE_CX", "")
@@ -51,10 +55,10 @@ class Settings:
     def validate_settings(self) -> None:
         """Validate that all required settings are present"""
         # Keep non-fatal to allow running without Gemini in dev or fallback mode
-        if not self.GEMINI_API_KEY:
+        if not (self.GEMINI_API_KEY or self.GEMINI_API_KEYS):
             import logging
             logging.getLogger(__name__).warning(
-                "GEMINI_API_KEY not set; AI evaluation will use a safe fallback."
+                "No Gemini API key configured; AI evaluation will use a safe fallback."
             )
     # Firestore does not require a database URL
 
