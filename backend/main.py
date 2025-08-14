@@ -4,6 +4,7 @@ import logging
 from contextlib import asynccontextmanager
 from app.core.config import settings
 from app.routers import health_router, ideas_router, leaderboard_router, users_router
+from app.services.evaluation_queue import evaluation_queue
 
 # Configure logging
 logging.basicConfig(
@@ -18,8 +19,15 @@ async def lifespan(app: FastAPI):
     logger.info(f"Starting {settings.API_TITLE} v{settings.API_VERSION}")
     logger.info(f"Debug mode: {settings.DEBUG}")
     logger.info(f"CORS origins: {settings.CORS_ORIGINS}")
+    # Start background evaluation queue worker (lazy; safe if called even if unused)
+    evaluation_queue.start()
     yield
     # Shutdown
+    # Gracefully stop queue worker
+    try:
+        await evaluation_queue.stop()
+    except Exception:
+        pass
     logger.info("Shutting down IdeaArena API")
 
 # Initialize FastAPI app with lifespan to avoid deprecated on_event
