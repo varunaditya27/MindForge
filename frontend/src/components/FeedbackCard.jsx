@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Brain, TrendingUp, Zap, Target, Star, MessageSquare, Users, Award } from 'lucide-react';
+import { Brain, Zap, Star, MessageSquare, Smile } from 'lucide-react';
 
 const FeedbackCard = ({ feedback, scores }) => {
   if (!feedback || !scores) {
@@ -8,16 +8,11 @@ const FeedbackCard = ({ feedback, scores }) => {
   }
 
   const criteria = [
-    { key: 'problemClarity', icon: MessageSquare, title: 'Problem Clarity', description: 'Clarity and specificity of problem', color: 'text-teal-400', bgColor: 'bg-teal-500/20' },
-    { key: 'originality', icon: Star, title: 'Originality', description: 'Novelty and differentiation', color: 'text-purple-400', bgColor: 'bg-purple-500/20' },
-    { key: 'feasibility', icon: Target, title: 'Feasibility', description: 'Technical and practical feasibility', color: 'text-green-400', bgColor: 'bg-green-500/20' },
-    { key: 'technicalComplexity', icon: Brain, title: 'Technical Complexity', description: 'Depth of technical approach', color: 'text-sky-400', bgColor: 'bg-sky-500/20' },
-    { key: 'scalability', icon: TrendingUp, title: 'Scalability', description: 'Growth potential and scale', color: 'text-blue-400', bgColor: 'bg-blue-500/20' },
-    { key: 'marketSize', icon: Users, title: 'Market Size', description: 'Size and reach of target market', color: 'text-emerald-400', bgColor: 'bg-emerald-500/20' },
-    { key: 'businessModel', icon: Award, title: 'Business Model', description: 'Clarity and viability of monetization', color: 'text-fuchsia-400', bgColor: 'bg-fuchsia-500/20' },
-    { key: 'impact', icon: Zap, title: 'Impact', description: 'Expected user/societal impact', color: 'text-orange-400', bgColor: 'bg-orange-500/20' },
-    { key: 'executionPlan', icon: TrendingUp, title: 'Execution Plan', description: 'Roadmap and MVP readiness', color: 'text-indigo-400', bgColor: 'bg-indigo-500/20' },
-    { key: 'riskMitigation', icon: Target, title: 'Risk Mitigation', description: 'Awareness and mitigation of risks', color: 'text-rose-400', bgColor: 'bg-rose-500/20' },
+    { key: 'aiRelevance', icon: Brain, title: 'AI Relevance', description: 'Central, plausible AI role', color: 'text-sky-400', bgColor: 'bg-sky-500/20' },
+    { key: 'creativity', icon: Star, title: 'Creativity', description: 'Original twist / novelty', color: 'text-purple-400', bgColor: 'bg-purple-500/20' },
+    { key: 'impact', icon: Zap, title: 'Impact', description: 'Real-world benefit & timeliness', color: 'text-orange-400', bgColor: 'bg-orange-500/20' },
+    { key: 'clarity', icon: MessageSquare, title: 'Clarity', description: 'Concise, structured pitch', color: 'text-teal-400', bgColor: 'bg-teal-500/20' },
+    { key: 'funFactor', icon: Smile, title: 'Fun / Wow', description: 'Delight & memorability', color: 'text-pink-400', bgColor: 'bg-pink-500/20' },
   ];
 
   const getScoreColor = (score) => {
@@ -83,7 +78,7 @@ const FeedbackCard = ({ feedback, scores }) => {
           </div>
 
           {/* Detailed Scores */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
             {criteria.map((criterion) => {
               const score = scores[criterion.key];
               const IconComponent = criterion.icon;
@@ -174,16 +169,11 @@ FeedbackCard.propTypes = {
     feedback: PropTypes.string,
   }),
   scores: PropTypes.shape({
-    problemClarity: PropTypes.number,
-    originality: PropTypes.number,
-    feasibility: PropTypes.number,
-    technicalComplexity: PropTypes.number,
-    scalability: PropTypes.number,
-    marketSize: PropTypes.number,
-    businessModel: PropTypes.number,
+    aiRelevance: PropTypes.number,
+    creativity: PropTypes.number,
     impact: PropTypes.number,
-    executionPlan: PropTypes.number,
-    riskMitigation: PropTypes.number,
+    clarity: PropTypes.number,
+    funFactor: PropTypes.number,
     totalScore: PropTypes.number,
   }),
 };

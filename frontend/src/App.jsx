@@ -51,16 +51,11 @@ function App() {
                 const ev = res.data.lastEvaluation;
                 setFeedback({ feedback: ev.feedback });
                 setScores({
-                  problemClarity: ev.problemClarity,
-                  originality: ev.originality,
-                  feasibility: ev.feasibility,
-                  technicalComplexity: ev.technicalComplexity,
-                  scalability: ev.scalability,
-                  marketSize: ev.marketSize,
-                  businessModel: ev.businessModel,
+                  aiRelevance: ev.aiRelevance,
+                  creativity: ev.creativity,
                   impact: ev.impact,
-                  executionPlan: ev.executionPlan,
-                  riskMitigation: ev.riskMitigation,
+                  clarity: ev.clarity,
+                  funFactor: ev.funFactor,
                   totalScore: ev.totalScore,
                 });
               }
@@ -125,16 +120,11 @@ function App() {
   const handleSubmissionSuccess = (submissionResult) => {
     setFeedback(submissionResult);
     setScores({
-  problemClarity: submissionResult.problemClarity,
-  originality: submissionResult.originality,
-  feasibility: submissionResult.feasibility,
-  technicalComplexity: submissionResult.technicalComplexity,
-  scalability: submissionResult.scalability,
-  marketSize: submissionResult.marketSize,
-  businessModel: submissionResult.businessModel,
-  impact: submissionResult.impact,
-  executionPlan: submissionResult.executionPlan,
-  riskMitigation: submissionResult.riskMitigation,
+      aiRelevance: submissionResult.aiRelevance,
+      creativity: submissionResult.creativity,
+      impact: submissionResult.impact,
+      clarity: submissionResult.clarity,
+      funFactor: submissionResult.funFactor,
       totalScore: submissionResult.totalScore
     });
     setHasSubmittedThisRound(true);

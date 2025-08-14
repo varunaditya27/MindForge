@@ -16,8 +16,8 @@ const EventInfo = () => {
     },
     {
       icon: Target,
-      title: "Detailed Scoring",
-      description: "10 criteria, each scored 1–100; average is your total"
+      title: "Focused Scoring",
+      description: "5 dimensions (AI relevance, creativity, impact, clarity, fun)"
     },
     {
       icon: Trophy,
@@ -65,18 +65,13 @@ const EventInfo = () => {
         {/* Scoring Information */}
         <div className="bg-navy-900/30 rounded-xl p-6 border border-navy-700 card-glow">
           <h3 className="text-xl font-semibold text-white mb-4">How Your Idea Is Scored</h3>
-          <p className="text-gray-300 text-sm mb-4">Each criterion is scored 1–100. Your total score is the average of all 10 criteria.</p>
+          <p className="text-gray-300 text-sm mb-4">Each dimension is scored 0–100. Total score is the average of the five.</p>
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 text-center text-gray-300 text-sm">
-            <div>Problem Clarity</div>
-            <div>Originality</div>
-            <div>Feasibility</div>
-            <div>Technical Complexity</div>
-            <div>Scalability</div>
-            <div>Market Size</div>
-            <div>Business Model</div>
+            <div>AI Relevance</div>
+            <div>Creativity</div>
             <div>Impact</div>
-            <div>Execution Plan</div>
-            <div>Risk Mitigation</div>
+            <div>Clarity</div>
+            <div>Fun / Wow</div>
           </div>
         </div>
 
