@@ -3,7 +3,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000
 
 export const submitIdea = async (submissionData) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/ideas/submit`, {
+  const response = await fetch(`${API_BASE_URL}/ideas/submit`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -28,6 +28,35 @@ export const submitIdea = async (submissionData) => {
       data: null,
       error: error.message
     };
+  }
+};
+
+// Async (queued) submission
+export const submitIdeaAsync = async (submissionData) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/ideas/submit_async`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(submissionData),
+    });
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const data = await response.json(); // { jobId, status }
+    return { success: true, data, error: null };
+  } catch (error) {
+    console.error('Error enqueuing idea:', error);
+    return { success: false, data: null, error: error.message };
+  }
+};
+
+export const getIdeaJobStatus = async (jobId) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/ideas/status/${jobId}`);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    const data = await response.json(); // { id, status, result? }
+    return { success: true, data, error: null };
+  } catch (error) {
+    console.error('Error fetching job status:', error);
+    return { success: false, data: null, error: error.message };
   }
 };
 
