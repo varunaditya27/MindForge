@@ -33,22 +33,22 @@ const Login = ({ onLoginSuccess }) => {
           <div className="flex justify-center mb-6">
             <Logo size="large" />
           </div>
-          <h1 className="text-3xl sm:text-4xl font-bold heading-gradient mb-2">
-            IdeaArena
+          <h1 className="font-display text-3xl sm:text-4xl font-semibold heading-gradient mb-2">
+            MindForge
           </h1>
-          <p className="text-gray-400">
-            AI-Powered Idea Evaluation Platform
+          <p className="text-muted">
+            Where creativity is tempered into innovation
           </p>
         </div>
 
         {/* Login Card */}
-  <div className="bg-dark-800/50 backdrop-blur-sm rounded-2xl p-8 border border-navy-800 shadow-2xl card-glow">
+  <div className="molten-card backdrop-blur-md rounded-2xl p-8 border border-[#3a2516] shadow-[0_0_25px_-4px_rgba(255,107,0,0.4)] ring-1 ring-[#ff6b00]/10 relative overflow-hidden">
           <div className="text-center mb-6">
-            <h2 className="text-2xl font-semibold text-white mb-2">
+            <h2 className="font-display text-2xl font-semibold text-white mb-2">
               Welcome Back
             </h2>
-            <p className="text-gray-400">
-              Sign in to submit your innovative ideas
+              <p className="text-soft/70 text-sm">
+                Sign in to ignite and refine your innovation
             </p>
           </div>
 
@@ -76,33 +76,52 @@ const Login = ({ onLoginSuccess }) => {
             ) : (
               <>
                 <Globe className="w-5 h-5" />
-                <span>Continue with Google</span>
+                <span>Enter the Forge</span>
+              </>
+            )}
+          </button>
+          <button
+            onClick={handleGoogleSignIn}
+            disabled={isLoading}
+            className="hammer-btn w-full relative overflow-hidden bg-gradient-to-br from-[#ff6200] via-[#ff4d00] to-[#ffb347] hover:from-[#ff751a] hover:via-[#ff560a] hover:to-[#ffc27a] text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_16px_-2px_rgba(255,107,0,0.55)]"
+          >
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-40 transition-opacity duration-500 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.35),transparent_60%)]" />
+            {isLoading ? (
+              <div className="loading-dots">
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+              </div>
+            ) : (
+              <>
+                <Globe className="w-5 h-5 drop-shadow" />
+                <span className="tracking-wide">Enter the Forge</span>
               </>
             )}
           </button>
 
           <div className="mt-6 text-center">
-            <p className="text-xs text-gray-500">
-              By signing in, you agree to participate in the IdeaArena event and 
-              allow your name and score to be displayed on the public leaderboard.
+            <p className="text-xs text-faint leading-relaxed">
+              By signing in you agree your name & alloy score appear on the public forge rankings. Detailed feedback stays private to your session.
             </p>
           </div>
         </div>
 
         {/* Event Info */}
-        <div className="mt-8 text-center">
+        <div className="mt-10 text-center">
           <div className="grid grid-cols-3 gap-4 text-center">
-            <div>
-              <div className="text-navy-400 font-semibold">AI Powered</div>
-              <div className="text-xs text-gray-500">Gemini Evaluation</div>
+            <div className="p-3 rounded-lg bg-[#1d120c]/70 border border-[#3a2516]">
+              <div className="text-xs text-muted mb-1">AI Powered</div>
+              <div className="text-[10px] uppercase tracking-wide text-faint/60">Gemini Alloy</div>
             </div>
-            <div>
-              <div className="text-navy-400 font-semibold">Live</div>
-              <div className="text-xs text-gray-500">Auto-updating Leaderboard</div>
+            <div className="p-3 rounded-lg bg-[#1d120c]/70 border border-[#3a2516]">
+              <div className="text-xs text-muted mb-1">Live</div>
+              <div className="text-[10px] uppercase tracking-wide text-faint/60">Auto Rankings</div>
             </div>
-            <div>
-              <div className="text-navy-400 font-semibold">Instant</div>
-              <div className="text-xs text-gray-500">Feedback</div>
+            <div className="p-3 rounded-lg bg-[#1d120c]/70 border border-[#3a2516]">
+              <div className="text-xs text-muted mb-1">Instant</div>
+              <div className="text-[10px] uppercase tracking-wide text-faint/60">Feedback</div>
             </div>
           </div>
         </div>

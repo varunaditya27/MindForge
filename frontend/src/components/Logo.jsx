@@ -24,14 +24,14 @@ const Logo = ({ size = 'medium', className = '', showSeparator = true, opacity =
   const config = sizeConfig[size];
 
   return (
-    <div className={`flex items-center space-x-2 sm:space-x-3 ${className}`}>
+  <div className={`flex items-center space-x-2 sm:space-x-3 ${className}`}>
       <img 
         src="/RVCE_Logo_With_Text.png" 
         alt="RVCE" 
         className={`${config.rvce} w-auto object-contain ${opacityClass}`}
       />
       {showSeparator && (
-        <div className={`hidden sm:block w-px ${config.separator} bg-navy-600 ${opacityClass}`}></div>
+    <div className={`hidden sm:block w-px ${config.separator} bg-gradient-to-b from-[#ff9a3c] via-[#ff6b00] to-[#3a2516] opacity-70 rounded-full shadow-[0_0_4px_rgba(255,107,0,0.5)] ${opacityClass}`}></div>
       )}
       <img 
         src="/CCLogo_BG_Removed.png" 
