@@ -71,7 +71,7 @@ const UserProfileSetup = ({ user, onProfileComplete }) => {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-[#070504]">
       <div className="pointer-events-none absolute inset-0 bg-grid opacity-15" />
-      <div className="pointer-events-none absolute inset-0 smoke-overlay" />
+  {/* Removed smoke overlay */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,rgba(255,107,0,0.18),transparent_60%)]" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_75%_75%,rgba(255,154,60,0.12),transparent_65%)]" />
       <div className="max-w-md w-full relative">

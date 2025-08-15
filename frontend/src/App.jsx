@@ -181,15 +181,6 @@ function App() {
     <div className="relative min-h-screen bg-gradient-to-br from-black via-[#0c0705] to-[#120b07] overflow-hidden">
       <div className="pointer-events-none absolute inset-0 bg-grid opacity-10"></div>
       <div className="pointer-events-none absolute inset-0 bg-radial"></div>
-      <div className="smoke-overlay"></div>
-      <div className="embers" aria-hidden="true">
-        {Array.from({ length: 40 }).map(() => {
-          const id = Math.random().toString(36).slice(2);
-          return (
-            <span key={id} style={{ left: `${Math.random()*100}%`, animationDelay: `${(Math.random()*-8).toFixed(2)}s` }} />
-          );
-        })}
-      </div>
       <div className="relative">
         <Navbar user={user} onSignOut={handleSignOut} />
 

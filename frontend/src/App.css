@@ -40,29 +40,6 @@ body { font-feature-settings: "liga" on, "calt" on; }
 .text-muted { color:#c48e6c; }
 .text-faint { color:#a87454; }
 
-/* Ember particle animation */
-.embers {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-.embers span {
-  position: absolute;
-  bottom: -20px;
-  width: 4px;
-  height: 4px;
-  background: radial-gradient(circle at center, #ff9a3c 0%, rgba(255,107,0,0.1) 70%);
-  border-radius: 50%;
-  animation: rise 6s linear infinite;
-  opacity: 0.7;
-}
-@keyframes rise {
-  0% { transform: translateY(0) scale(0.6); opacity: 0; }
-  10% { opacity: 0.9; }
-  80% { opacity: 0.4; }
-  100% { transform: translateY(-120vh) scale(0.2); opacity: 0; }
-}
 
 /* Temperature gauge bar (can be applied dynamically) */
 .temp-gauge-track { background: linear-gradient(to right, #1f2937, #0f172a); }
@@ -102,15 +79,6 @@ body { font-feature-settings: "liga" on, "calt" on; }
   100% { transform: translateY(30px); }
 }
 
-/* Smoke overlay (subtle) */
-.smoke-overlay {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: radial-gradient(circle at 20% 80%, rgba(255,140,64,0.05), transparent 55%),
-              radial-gradient(circle at 80% 30%, rgba(255,140,64,0.05), transparent 60%);
-  mix-blend-mode: lighten;
-}
 
 /* Animated molten gauge (applied to width transitions) */
 .gauge-track { height: 0.75rem; border-radius: 9999px; overflow: hidden; position: relative; background: linear-gradient(90deg,#1a120d,#0f0a07); }
@@ -137,10 +105,6 @@ body { font-feature-settings: "liga" on, "calt" on; }
 }
 .hammer-btn:hover:before { opacity: 1; }
 
-/* Ember utility for dynamic JS inserted spans */
-.embers span:nth-child(3n) { animation-duration: 7s; animation-delay: -2s; }
-.embers span:nth-child(4n) { width: 3px; height: 3px; animation-duration: 5.5s; }
-.embers span:nth-child(5n) { width: 5px; height: 5px; animation-duration: 8s; animation-delay: -3s; }
 
 /* Focus ring utility (applied via class focus-ring) */
 .focus-ring:focus-visible {
@@ -170,7 +134,7 @@ body { font-feature-settings: "liga" on, "calt" on; }
 
 /* Reduced motion preferences */
 @media (prefers-reduced-motion: reduce) {
-  .embers span, .gauge-fill, .heat-shimmer:after { animation: none !important; }
+  .gauge-fill, .heat-shimmer:after { animation: none !important; }
   .hammer-btn:active { transform: none; }
   .tilt-card:hover { transform: none; }
   .loading-dots div { animation: none !important; }

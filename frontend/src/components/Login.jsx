@@ -27,7 +27,7 @@ const Login = ({ onLoginSuccess }) => {
     <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden bg-[#070504]">
       {/* Subtle pattern & atmospheric layers */}
       <div className="pointer-events-none absolute inset-0 bg-grid opacity-15" />
-      <div className="pointer-events-none absolute inset-0 smoke-overlay" />
+  {/* Removed smoke overlay */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,107,0,0.18),transparent_60%)]" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(255,154,60,0.12),transparent_65%)]" />
 
