@@ -10,8 +10,8 @@ async def root():
     """Root endpoint - API status"""
     return APIResponse(
         status="success",
-        message="IdeaArena API is running",
-        data={"version": "1.0.0", "service": "IdeaArena API"}
+    message="MindForge API is running",
+    data={"version": "1.0.0", "service": "MindForge API"}
     )
 
 @router.get("/health", response_model=HealthResponse)

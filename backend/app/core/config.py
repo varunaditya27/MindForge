@@ -9,8 +9,8 @@ class Settings:
     """Application settings and configuration"""
     
     # API Settings
-    API_TITLE: str = "IdeaArena API"
-    API_DESCRIPTION: str = "AI-powered idea evaluation platform for RVCE coding events"
+    API_TITLE: str = "MindForge API"
+    API_DESCRIPTION: str = "MindForge – AI-tempered innovation evaluation platform for RVCE coding events"
     API_VERSION: str = "1.0.0"
     
     # Server Settings

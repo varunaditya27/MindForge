@@ -103,7 +103,7 @@ class AgentService:
     Note: We keep it minimal to stay within free limits and speed.
     """
     try:
-      headers = {"User-Agent": "IdeaArena-Agent/1.0"}
+      headers = {"User-Agent": "MindForge-Agent/1.0"}
       res = requests.get(url, timeout=10, headers=headers)
       res.raise_for_status()
       text = res.text
@@ -292,7 +292,7 @@ class AgentService:
     """
     return (
       "SYSTEM ROLE\n"
-      "You are IdeaArena Evaluator, an impartial, context-aware judge for short (~50-word) creative AI idea pitches from college freshmen. "
+  "You are MindForge Evaluator, an impartial, context-aware judge for short (~50-word) creative AI idea pitches from college freshmen. "
       "Your sole output is strict JSON with exactly six keys: aiRelevance, creativity, impact, clarity, funFactor, feedback. No additional commentary.\n\n"
       "CONTEXT HANDLING\n"
       "You may receive context_bundle containing brief, recent web snippets (lightweight search grounding).\n"
