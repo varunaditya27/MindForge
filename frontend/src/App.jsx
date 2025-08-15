@@ -142,20 +142,26 @@ function App() {
 
   if (loading) {
     return (
-      <div className="relative min-h-screen bg-gradient-to-br from-dark-950 via-dark-900 to-navy-950 flex items-center justify-center overflow-hidden">
-        <div className="pointer-events-none absolute inset-0 bg-grid opacity-30"></div>
-        <div className="pointer-events-none absolute inset-0 bg-radial"></div>
+      <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#0b0604]">
+        {/* Ember gradient washes */}
+        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_30%_40%,rgba(255,107,0,0.18),transparent_60%),radial-gradient(circle_at_70%_65%,rgba(255,159,64,0.14),transparent_65%)]" />
+        {/* Subtle forge striations */}
+        <div className="absolute inset-0 pointer-events-none opacity-20 mix-blend-overlay bg-[repeating-linear-gradient(115deg,rgba(255,132,40,0.08)_0px,rgba(255,132,40,0.08)_2px,transparent_2px,transparent_8px)]" />
+        {/* Vignette */}
+        <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_55%,#090604_80%)]" />
         <div className="relative text-center px-6">
-          <div className="mb-6 flex justify-center">
+          <div className="mb-8 flex justify-center">
             <LogoFooter size="large" />
           </div>
-          <div className="loading-dots mb-4">
-            <div></div>
-            <div></div>
-            <div></div>
-            <div></div>
+          <div className="loading-dots mb-6 mx-auto" aria-label="Loading" role="status">
+            <div />
+            <div />
+            <div />
+            <div />
           </div>
-          <p className="text-gray-400">Igniting MindForge...</p>
+          <p className="font-display tracking-wide text-sm uppercase bg-clip-text text-transparent bg-gradient-to-r from-[#ff6b00] via-[#ff9540] to-[#ff6b00] drop-shadow-[0_0_6px_rgba(255,107,0,0.35)]">
+            Forging Evaluation...
+          </p>
         </div>
       </div>
     );
