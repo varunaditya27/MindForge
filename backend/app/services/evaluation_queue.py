@@ -26,6 +26,7 @@ from __future__ import annotations
 import asyncio
 import uuid
 import logging
+import time
 from dataclasses import dataclass
 from typing import Dict, Optional
 
@@ -102,10 +103,18 @@ class EvaluationQueue:
         async with self._lock:
             job.status = "processing"
         logger.info(f"Processing evaluation job {job.id} for {job.submission.uid}")
+        start_time = time.perf_counter()
         try:
             # Agentic first
+            logger.debug(
+                "job=%s stage=agent_service.start uid=%s idea_preview=%r",
+                job.id,
+                job.submission.uid,
+                (job.submission.idea[:120] + '…') if len(job.submission.idea) > 120 else job.submission.idea,
+            )
             result = agent_service.evaluate(job.submission)
             if not result:
+                logger.debug("job=%s stage=agent_service.fallback_to_ai uid=%s", job.id, job.submission.uid)
                 result = ai_service.evaluate_idea(job.submission)
             if not result:
                 raise RuntimeError("All evaluation strategies failed")
@@ -147,6 +156,15 @@ class EvaluationQueue:
             async with self._lock:
                 job.result = result
                 job.status = "done"
+            elapsed = (time.perf_counter() - start_time) * 1000
+            logger.info(
+                "Evaluation complete job=%s uid=%s score=%s elapsed_ms=%.1f path=%s",
+                job.id,
+                job.submission.uid,
+                result.totalScore,
+                elapsed,
+                "agent" if 'agent' in (result.feedback.lower() if result and result.feedback else '') else "mixed/ai",
+            )
         except Exception as e:  # noqa: BLE001
             logger.error(f"Evaluation job {job.id} failed: {e}")
             async with self._lock:

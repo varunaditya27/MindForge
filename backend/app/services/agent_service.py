@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import json
 import logging
+import time
 from dataclasses import dataclass
 from typing import List, Dict, Any, Optional, Tuple, Set
 
@@ -77,6 +78,7 @@ class AgentService:
     if not self.google_api_key or not self.google_cx:
       logger.info("Google CSE keys missing; skipping web search")
       return []
+    started = time.perf_counter()
     try:
       url = (
         "https://www.googleapis.com/customsearch/v1"
@@ -93,9 +95,14 @@ class AgentService:
           link=it.get('link', ''),
           snippet=it.get('snippet', ''),
         ))
+      logger.debug(
+        "agent.search ok query=%r results=%d elapsed_ms=%.1f", query, len(results), (time.perf_counter()-started)*1000
+      )
       return results
     except Exception as e:
-      logger.warning(f"Web search failed: {e}")
+      logger.warning(
+        "agent.search fail query=%r error=%s elapsed_ms=%.1f", query, e, (time.perf_counter()-started)*1000
+      )
       return []
 
   def _fetch_page(self, url: str, max_chars: int = 3000) -> Optional[str]:
@@ -124,7 +131,8 @@ class AgentService:
     so that under heavy event load we avoid extra latency & cost.
     """
     # Basic tokenization / filtering
-    raw_tokens = [t.strip('.,:;()[]{}!?'"'\n\r\t") for t in text.split()]  # noqa: B950
+    delimiters = ".,:;()[]{}!?\"'\n\r\t"
+    raw_tokens = [t.strip(delimiters) for t in text.split()]
     stop: Set[str] = {
       'the','a','an','and','or','for','with','using','use','to','of','in','on','by','from','this','that','ai','ml','data',
       'we','our','it','its','is','are','be','as','at','into','via','will','can','users','user','app','platform'
@@ -140,6 +148,7 @@ class AgentService:
         candidates.append(tok_low)
       if len(candidates) >= max_terms:
         break
+    logger.debug("agent.terms extracted=%s", candidates)
     return candidates
 
   def _infer_domain(self, terms: List[str]) -> Optional[str]:
@@ -157,7 +166,9 @@ class AgentService:
     for domain, keys in domain_map.items():
       for t in terms:
         if any(k in t for k in keys):
+          logger.debug("agent.domain inferred=%s from_term=%s", domain, t)
           return domain
+    logger.debug("agent.domain inferred=None")
     return None
 
   def _generate_query_variants(self, base_query: str, core_terms: List[str], domain: Optional[str]) -> List[str]:
@@ -185,7 +196,11 @@ class AgentService:
       if qn and qn.lower() not in seen:
         deduped.append(qn)
         seen.add(qn.lower())
-    return deduped[:6]
+    final = deduped[:6]
+    logger.debug(
+      "agent.query_variants base_len=%d variants=%d domain=%s first=%r", len(base_query), len(final), domain, final[0] if final else None
+    )
+    return final
 
   def _aggregate_search(self, queries: List[str], per_query: int = 4, global_cap: int = 14) -> List[WebResult]:
     """Run multiple small searches and merge results with light scoring for diversity.
@@ -194,8 +209,9 @@ class AgentService:
     """
     all_results: List[Tuple[WebResult, str]] = []  # (result, originating_query)
     for q in queries:
-      results = self._search_web(q, num=per_query)
-      for r in results:
+      batch = self._search_web(q, num=per_query)
+      logger.debug("agent.aggregate query=%r batch=%d", q, len(batch))
+      for r in batch:
         all_results.append((r, q))
     # Score results: prefer unique hosts & earlier queries
     scored: List[Tuple[float, WebResult]] = []
@@ -219,7 +235,11 @@ class AgentService:
       score = base_score * diversity_bonus + 0.2 * snippet_factor
       scored.append((score, res))
     scored.sort(key=lambda x: x[0], reverse=True)
-    return [r for _, r in scored[:global_cap]]
+    top = [r for _, r in scored[:global_cap]]
+    logger.debug(
+      "agent.aggregate merged=%d unique=%d selected=%d", len(all_results), len(seen_links), len(top)
+    )
+    return top
 
   def _lightweight_content_select(self, html: str, max_len: int = 900) -> str:
     """Very small heuristic to extract a pseudo-summary from raw HTML/text.
@@ -252,12 +272,23 @@ class AgentService:
   def _enrich_results_with_content(self, results: List[WebResult], fetch_limit: int = 5) -> None:
     """Fetch & summarize a subset of pages to add richer grounding snippets."""
     for r in results[:fetch_limit]:
+      started = time.perf_counter()
       raw = self._fetch_page(r.link, max_chars=4000)
       if raw:
         try:
           r.content = self._lightweight_content_select(raw)
-        except Exception:  # noqa: BLE001
+          logger.debug(
+            "agent.enrich ok url=%s content_chars=%d elapsed_ms=%.1f", r.link, len(r.content), (time.perf_counter()-started)*1000
+          )
+        except Exception as e:  # noqa: BLE001
           r.content = raw[:800]
+          logger.debug(
+            "agent.enrich partial url=%s error=%s elapsed_ms=%.1f", r.link, e, (time.perf_counter()-started)*1000
+          )
+      else:
+        logger.debug(
+          "agent.enrich skip url=%s reason=no_fetch elapsed_ms=%.1f", r.link, (time.perf_counter()-started)*1000
+        )
 
   # -----------------------
   # Prompting and parsing
@@ -279,10 +310,14 @@ class AgentService:
       if r.content:
         entry["content_excerpt"] = (r.content[:600])
       bundle.append(entry)
-    return (
+    ctx = (
       "context_bundle = " + json.dumps(bundle, ensure_ascii=False) + "\n"
       "If context_bundle is empty, rely on general knowledge but DO NOT hallucinate unknown current statistics.\n"
     )
+    logger.debug(
+      "agent.context built entries=%d chars=%d", len(bundle), len(ctx)
+    )
+    return ctx
 
   def _build_prompt(self, submission: IdeaSubmission, context: str) -> str:
     """Compose the updated 2025 system prompt with the new 5 criteria.
@@ -395,8 +430,10 @@ class AgentService:
     """
     if not (self.google_api_key and self.google_cx):
       # No search capability -> empty context
+      logger.debug("agent.pipeline no_cse_keys uid=%s", submission.uid)
       return self._build_prompt(submission, "context_bundle = []\n")
 
+    pipeline_start = time.perf_counter()
     try:
       base_query = self._build_base_query(submission)
       core_terms = self._extract_core_terms(submission.idea)
@@ -405,6 +442,9 @@ class AgentService:
       merged_results = self._aggregate_search(query_variants)
       self._enrich_results_with_content(merged_results, fetch_limit=5)
       context = self._build_context(merged_results)
+      logger.debug(
+        "agent.pipeline success uid=%s variants=%d results=%d elapsed_ms=%.1f", submission.uid, len(query_variants), len(merged_results), (time.perf_counter()-pipeline_start)*1000
+      )
       return self._build_prompt(submission, context)
     except Exception as e:  # noqa: BLE001
       logger.warning(f"Context enrichment failed; using fallback simple search. Error: {e}")
@@ -413,6 +453,9 @@ class AgentService:
       initial_results = self._search_web(base_query)
       self._fetch_top_contents(initial_results, limit=3)
       context = self._build_context(initial_results)
+      logger.debug(
+        "agent.pipeline fallback_basic uid=%s results=%d", submission.uid, len(initial_results)
+      )
       return self._build_prompt(submission, context)
 
   def _build_base_query(self, submission: IdeaSubmission) -> str:
@@ -460,10 +503,15 @@ class AgentService:
     Returns None if neither single nor multi client is available so caller can fallback.
     """
     if not (self.model or self.multi_client):
+      logger.debug("agent.evaluate skipped uid=%s reason=no_model", submission.uid)
       return None
 
+    eval_start = time.perf_counter()
     prompt = self._prepare_prompt_with_context(submission)
     analysis_prompt = self._compose_analysis_prompt(prompt)
+    logger.debug(
+      "agent.evaluate prompt_built uid=%s chars=%d", submission.uid, len(analysis_prompt)
+    )
 
     try:
       text = self._generate_text(analysis_prompt)
@@ -471,9 +519,16 @@ class AgentService:
         raise ValueError("Empty LLM response")
       json_payload = self._extract_json_segment(text)
       data = self._parse_response(json_payload)
+      elapsed_ms = (time.perf_counter() - eval_start) * 1000
+      logger.info(
+        "agent.evaluate success uid=%s score=%d elapsed_ms=%.1f", submission.uid, data['totalScore'], elapsed_ms
+      )
       return EvaluationResponse(**data)
     except Exception as e:
-      logger.warning(f"AgentService evaluation failed, falling back. Error: {e}")
+      elapsed_ms = (time.perf_counter() - eval_start) * 1000
+      logger.warning(
+        "agent.evaluate fail uid=%s error=%s elapsed_ms=%.1f", submission.uid, e, elapsed_ms
+      )
       return None
 
   # -----------------------

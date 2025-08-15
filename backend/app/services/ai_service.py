@@ -1,6 +1,7 @@
 import google.generativeai as genai
 import json
 import logging
+import time
 from typing import Dict, Any, Optional
 from ..core.config import settings
 from ..models.schemas import IdeaSubmission, EvaluationResponse
@@ -208,10 +209,22 @@ class AIService:
             EvaluationResponse: The evaluation results or None if failed
         """
         try:
-            logger.info(f"Starting AI evaluation for {submission.name} ({submission.uid})")
+            t0 = time.perf_counter()
+            idea_preview = (submission.idea[:140] + '…') if len(submission.idea) > 140 else submission.idea
+            logger.info(
+                "ai_eval.start uid=%s name=%s idea_chars=%d preview=%r multi_client=%s",
+                submission.uid,
+                submission.name,
+                len(submission.idea),
+                idea_preview,
+                bool(getattr(self, 'multi_client', None)),
+            )
 
             # Create prompt
             prompt = self._create_evaluation_prompt(submission)
+            logger.debug(
+                "ai_eval.prompt uid=%s prompt_chars=%d prompt_first_line=%r", submission.uid, len(prompt), prompt.splitlines()[0][:120]
+            )
 
             # Get AI response (use multi-key if available)
             if getattr(self, 'multi_client', None):
@@ -224,6 +237,9 @@ class AIService:
                 text = self._extract_text_single(response)
             if not text:
                 raise ValueError("Empty response from AI")
+            logger.debug(
+                "ai_eval.response_raw uid=%s chars=%d head=%r", submission.uid, len(text), text[:180].replace('\n',' ') + ("…" if len(text) > 180 else "")
+            )
 
             # Parse response
             evaluation_data = self._parse_ai_response(text)
@@ -231,12 +247,25 @@ class AIService:
             # Create response model
             evaluation_response = EvaluationResponse(**evaluation_data)
 
-            logger.info(f"AI evaluation completed for {submission.name}: {evaluation_response.totalScore}/100")
+            elapsed_ms = (time.perf_counter() - t0) * 1000
+            logger.info(
+                "ai_eval.success uid=%s score=%d elapsed_ms=%.1f feedback_chars=%d",
+                submission.uid,
+                evaluation_response.totalScore,
+                elapsed_ms,
+                len(evaluation_response.feedback),
+            )
             return evaluation_response
 
         except Exception as e:
-            logger.error(f"AI evaluation failed for {submission.name}: {e}")
-            return self._fallback_synthetic(submission)
+            logger.warning(
+                "ai_eval.failure uid=%s error=%s -> using synthetic fallback", submission.uid, e
+            )
+            fallback = self._fallback_synthetic(submission)
+            logger.info(
+                "ai_eval.fallback uid=%s synthetic_score=%d", submission.uid, fallback.totalScore
+            )
+            return fallback
 
 # Create singleton instance
 ai_service = AIService()
