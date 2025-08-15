@@ -179,8 +179,6 @@ function App() {
   // Main application
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-black via-[#0c0705] to-[#120b07] overflow-hidden">
-      {/* Skip to content for accessibility */}
-      <a href="#main" className="skip-link focus-ring">Skip to main content</a>
       <div className="pointer-events-none absolute inset-0 bg-grid opacity-10"></div>
       <div className="pointer-events-none absolute inset-0 bg-radial"></div>
       <div className="smoke-overlay"></div>

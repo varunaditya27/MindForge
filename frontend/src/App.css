@@ -163,22 +163,6 @@ body { font-feature-settings: "liga" on, "calt" on; }
   border: 0;
 }
 
-/* Skip link */
-.skip-link {
-  position: absolute;
-  top: 0.25rem;
-  left: 0.5rem;
-  background: #1d120c;
-  color: #ffb38a;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid #3a2516;
-  border-radius: 0.5rem;
-  transform: translateY(-140%);
-  transition: transform .25s ease;
-  z-index: 1000;
-}
-.skip-link:focus-visible { transform: translateY(0); }
-
 /* Subtle tilt card effect */
 .tilt-card { transition: transform .5s cubic-bezier(.19,1,.22,1), box-shadow .4s; }
 .tilt-card:hover { transform: translateY(-4px) rotate3d(1,1,0,3deg); box-shadow: 0 14px 30px -10px rgba(255,107,0,0.25); }
