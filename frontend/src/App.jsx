@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from './firebase_config';
-import { getUserProfile, saveUserProfile, getFeedback, getScores, clearUserData } from './utils/storage';
+import { getUserProfile, saveUserProfile, getFeedback, getScores, clearUserData, migrateLegacyKeys } from './utils/storage';
 import { getUserProfileApi, upsertUserProfile } from './utils/api';
 
 // Components
@@ -29,7 +29,8 @@ function App() {
       setUser(user);
       if (user) {
         // Namespace storage per user (prefer email, else uid)
-        const userKey = user.email || user.uid;
+  const userKey = user.email || user.uid;
+  migrateLegacyKeys(userKey);
         // Load saved profile and feedback for this user
   const savedProfile = getUserProfile(userKey);
   const savedFeedback = getFeedback(userKey);
@@ -154,7 +155,7 @@ function App() {
             <div></div>
             <div></div>
           </div>
-          <p className="text-gray-400">Loading IdeaArena...</p>
+          <p className="text-gray-400">Igniting MindForge...</p>
         </div>
       </div>
     );
@@ -177,13 +178,24 @@ function App() {
 
   // Main application
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-dark-950 via-dark-900 to-navy-950 overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 bg-grid opacity-30"></div>
+    <div className="relative min-h-screen bg-gradient-to-br from-black via-[#0c0705] to-[#120b07] overflow-hidden">
+      {/* Skip to content for accessibility */}
+      <a href="#main" className="skip-link focus-ring">Skip to main content</a>
+      <div className="pointer-events-none absolute inset-0 bg-grid opacity-10"></div>
       <div className="pointer-events-none absolute inset-0 bg-radial"></div>
+      <div className="smoke-overlay"></div>
+      <div className="embers" aria-hidden="true">
+        {Array.from({ length: 40 }).map(() => {
+          const id = Math.random().toString(36).slice(2);
+          return (
+            <span key={id} style={{ left: `${Math.random()*100}%`, animationDelay: `${(Math.random()*-8).toFixed(2)}s` }} />
+          );
+        })}
+      </div>
       <div className="relative">
         <Navbar user={user} onSignOut={handleSignOut} />
 
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <main id="main" role="main" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <EventInfo />
 
           <AIFunFactBar />
@@ -220,14 +232,21 @@ function App() {
         </main>
 
         {/* Footer */}
-        <footer className="relative bg-dark-900/80 backdrop-blur-sm border-t border-navy-800 py-8 mt-8">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center">
-              <div className="flex justify-center mb-4">
+  <footer className="relative mt-20 overflow-hidden" role="contentinfo">
+          <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(to_top,rgba(15,10,7,0.95),rgba(15,10,7,0.85),transparent)]" />
+          <div className="absolute inset-0 opacity-30 mix-blend-plus-lighter bg-[radial-gradient(circle_at_20%_40%,rgba(255,107,0,0.25),transparent_60%),radial-gradient(circle_at_80%_70%,rgba(255,154,60,0.18),transparent_65%)]" />
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+            <div className="flex flex-col items-center">
+              <div className="flex justify-center mb-6">
                 <Logo size="small" opacity="muted" />
               </div>
-              <p className="text-gray-500 text-sm">
-                © 2025 IdeaArena - RVCE Coding Club. Powered by AI.
+              <div className="flex flex-wrap items-center justify-center gap-4 text-[11px] tracking-wide uppercase text-[#a87454] mb-4">
+                <span className="px-3 py-1 rounded-full bg-[#1d120c]/70 border border-[#3a2516]">Forged at RVCE</span>
+                <span className="px-3 py-1 rounded-full bg-[#1d120c]/70 border border-[#3a2516]">AI Tempered</span>
+                <span className="px-3 py-1 rounded-full bg-[#1d120c]/70 border border-[#3a2516]">Realtime Rankings</span>
+              </div>
+              <p className="text-[#e6cbb9]/50 text-[11px] tracking-wide uppercase">
+                © 2025 MindForge • RVCE Coding Club • Alloys of Innovation
               </p>
             </div>
           </div>
