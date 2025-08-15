@@ -1,6 +1,6 @@
-# MindForge Backend �
+# MindForge Backend 🔥
 
-FastAPI backend service for AI-powered idea evaluation platform.
+FastAPI backend powering AI‑tempered idea evaluation with agentic‑first (web‑augmented) scoring, queue smoothing for bursty event traffic, multi‑key Gemini rotation, and privacy‑aware Firestore persistence.
 
 ## 📁 Project Structure
 
@@ -17,15 +17,16 @@ backend/
 │   ├── routers/
 │   │   ├── __init__.py
 │   │   ├── health.py          # Health check endpoints
-│   │   ├── ideas.py           # Idea submission endpoints
+│   │   ├── ideas.py           # Async idea submission + job status endpoints
 │   │   └── leaderboard.py     # Leaderboard endpoints
 │   └── services/
 │       ├── __init__.py
-│       ├── ai_service.py       # Gemini AI integration (single or multi-key)
-│       ├── agent_service.py    # Web-augmented (Google CSE) agentic evaluation
-│       ├── gemini_client.py    # Round-robin Gemini multi-key wrapper
-│       ├── key_manager.py      # Thread-safe round-robin key manager
-│       └── firebase_service.py # Firebase Firestore operations
+│       ├── ai_service.py        # Core Gemini evaluation (strict JSON prompt + fallback)
+│       ├── agent_service.py     # Web-augmented (Google CSE) agentic evaluation layer
+│       ├── evaluation_queue.py  # In-memory async job queue + worker
+│       ├── gemini_client.py     # Round-robin Gemini multi-key wrapper
+│       ├── key_manager.py       # Thread-safe round-robin key manager
+│       └── firebase_service.py  # Firebase Firestore operations
 ├── main.py                    # FastAPI application entry point
 ├── run.py                     # Development server script
 ├── requirements.txt           # Python dependencies
@@ -52,76 +53,75 @@ FIREBASE_SERVICE_ACCOUNT_KEY=./firebase_admin_sdk.json
 
 ### 3. Run Development Server
 ```bash
-# Option 1: Using the run script
-python run.py
-
-# Option 2: Using uvicorn directly
+# Option 1: Using uvicorn directly
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
-# Option 3: Using the main module
+# Option 2: Using the main module
 python main.py
 ```
 
 The API will be available at `http://localhost:8000`
 
-## 📡 API Endpoints
+## 📡 API Endpoints (Current)
 
-### Health Check
-- `GET /` - Root endpoint
-- `GET /health` - Health check
+### Health
+- `GET /` – Root
+- `GET /health` – Liveness/status
 
-### Ideas
-- `POST /ideas/submit` - Submit idea for evaluation (10 criteria, totalScore is average)
+### Ideas (Async Queue Flow)
+- `POST /ideas/submit_async` – Enqueue a submission (guard: one per UID) → returns `{ jobId, status: "queued" }`
+- `GET /ideas/status/{jobId}` – Poll job status → `queued | processing | completed | failed` (on success includes evaluation payload)
 
 ### Leaderboard
-- `GET /leaderboard` - Get current rankings
+- `GET /leaderboard` – Current ranking (public slice only)
 
 ### Users
-- `POST /users/profile` - Create/update user profile (branch, rollNumber); persists `lastEvaluation`
-- `GET /users/profile/{uid}` - Get user profile, including latest `lastEvaluation` if present
+- `POST /users/profile` – Create/update profile (branch, rollNumber, name, etc.)
+- `GET /users/profile/{uid}` – Fetch profile + latest private `lastEvaluation`
 
-## 🧩 Architecture
+## 🧩 Architecture Overview
 
-### Models (`app/models/`)
-- **schemas.py**: Pydantic models for request/response validation
-  - `IdeaSubmission`: Request model for idea submissions
-  - `EvaluationResponse`: AI evaluation results
-  - `LeaderboardEntry`: Leaderboard data structure
-  - `APIResponse`: Generic API response
-  - `HealthResponse`: Health check response
+Flow: Client → (Auth via Firebase) → POST queue → Worker (agentic‑first, then baseline AI fallback) → Firestore (public + private slices) → Poll status → UI.
 
-### Services (`app/services/`)
-- **ai_service.py**: Gemini AI integration
-  - Prompt engineering for idea evaluation
-  - Response parsing and validation
-  - Error handling for AI failures
+### Layers
+- **Routers**: Thin HTTP surface (`ideas`, `leaderboard`, `users`, `health`).
+- **Queue (`evaluation_queue`)**: In‑memory FIFO with background worker to absorb traffic bursts & prevent model throttling.
+- **Evaluation Core (`ai_service`)**: Deterministic prompt + strict JSON parsing + graceful synthetic fallback path.
+- **Agentic Augmentation (`agent_service`)**: Primary evaluation path (if CSE keys) enriching prompts with lightweight web grounding (feasibility / trend / originality signals) before scoring.
+- **Multi-Key Rotation (`gemini_client` + `key_manager`)**: Round‑robin usage across `GEMINI_API_KEYS` to reduce per‑key rate limit pressure.
+- **Persistence (`firebase_service`)**: Writes two data shapes: public leaderboard doc and private `lastEvaluation` under `users/{uid}`.
+- **Config (`core.config`)**: Loads env, supports split Firebase credentials & preview-domain CORS regex.
 
-- **firebase_service.py**: Firebase Firestore operations
-  - Leaderboard updates
-  - Data retrieval
-  - Connection management
+### Evaluation Decision Tree (Agentic-First)
+1. Submission dequeued.
+2. If CSE keys present & Gemini reachable → attempt agentic path (multi-query search → context bundle → augmented prompt).
+3. If agentic path fails OR keys missing → baseline `ai_service` prompt.
+4. If Gemini unavailable → synthetic deterministic fallback (never blocks user).
+5. Compute `totalScore` (rounded average of 5 criteria) → persist & return.
 
-### Routers (`app/routers/`)
-- **health.py**: Health check and status endpoints
-- **ideas.py**: Idea submission and evaluation
-- **leaderboard.py**: Leaderboard data retrieval
-
-### Configuration (`app/core/`)
-- **config.py**: Centralized configuration management
-  - Environment variable loading
-  - Settings validation
-  - Default values
+Resilience principle: user always gets a structured response quickly; advanced augmentation is opportunistic.
 
 ## 🔧 Configuration
 
-### Environment Variables
-| Variable | Description | Required | Default |
-|----------|-------------|----------|---------|
-| `GEMINI_API_KEY` | Google Gemini API key | Yes | - |
-| `FIREBASE_PROJECT_ID` | Firebase project ID | No | - |
-| `CORS_ORIGINS` | Allowed CORS origins | No | `http://localhost:5173` |
-| `DEBUG` | Enable debug mode | No | `false` |
-| `FIREBASE_SERVICE_ACCOUNT_KEY` | Path to Firebase service account JSON | No | `./firebase_admin_sdk.json` |
+### Core Environment Variables
+| Variable | Description | Required | Notes |
+|----------|-------------|----------|-------|
+| `DEBUG` | Enable debug features | No | `true/false` |
+| `CORS_ORIGINS` | Comma list of allowed origins | No | e.g. `http://localhost:5173,https://app.vercel.app` |
+| `CORS_ALLOW_ORIGIN_REGEX` | Regex for dynamic preview origins | No | Useful for Vercel previews |
+| `GEMINI_API_KEY` | Single Gemini key | One of | Provide if not using multi-key |
+| `GEMINI_API_KEYS` | Comma-separated Gemini keys | One of | Enables round-robin load balancing |
+| `GOOGLE_CSE_API_KEY` | Google Programmable Search API key | No | Needed for agentic mode |
+| `GOOGLE_CSE_CX` | Programmable Search Engine CX id | No | Needed for agentic mode |
+| `FIREBASE_PROJECT_ID` | Firebase Project ID | Yes | Firestore target |
+| `FIREBASE_PRIVATE_KEY_ID` | Firebase service account key id | Yes* | *If using split creds form |
+| `FIREBASE_PRIVATE_KEY` | Private key (escaped newlines) | Yes* | Wrap in quotes; `\n` for newlines |
+| `FIREBASE_CLIENT_EMAIL` | Service account client email | Yes* |  |
+| `FIREBASE_CLIENT_ID` | Service account client id | Yes* |  |
+| `FIREBASE_CLIENT_X509_CERT_URL` | Cert URL | No | Optional |
+| `FIREBASE_SERVICE_ACCOUNT_KEY` | Path to JSON file | Alt | Alternate to split creds |
+
+Either provide the split credential fields (preferred for managed hosts) OR mount a JSON file and point `FIREBASE_SERVICE_ACCOUNT_KEY` to it.
 
 ### Firebase Setup
 1. Create Firebase project
@@ -129,10 +129,11 @@ The API will be available at `http://localhost:8000`
 3. Set up a service account for Admin SDK
 4. Add your service account JSON as `backend/firebase_admin_sdk.json` or set `FIREBASE_SERVICE_ACCOUNT_KEY` to its path
 
-### Gemini AI Setup
-1. Get API key(s) from Google AI Studio
-2. Add either GEMINI_API_KEY (single) or GEMINI_API_KEYS (comma-separated) in `.env`
-3. We automatically use round-robin across keys to reduce rate limits during the event
+### Gemini & Agentic Setup
+1. Obtain Gemini key(s) from Google AI Studio.
+2. (Optional) Supply multiple keys via `GEMINI_API_KEYS` for higher throughput.
+3. (Optional Agentic) Create a Google Programmable Search Engine (CSE) → note API key + CX → set `GOOGLE_CSE_API_KEY` & `GOOGLE_CSE_CX`.
+4. Agentic mode activates automatically when both CSE values are present.
 
 ## 🔒 Security
 
@@ -153,25 +154,35 @@ The API will be available at `http://localhost:8000`
 
 ## 📊 AI Evaluation
 
-### Scoring Criteria (10, each 1–100)
-1. Problem Clarity
-2. Originality
-3. Feasibility
-4. Technical Complexity
-5. Scalability
-6. Market Size
-7. Business Model
-8. Impact
-9. Execution Plan
-10. Risk Mitigation
+### Rubric (5 Criteria, 0–100 each)
+1. `aiRelevance` – Centrality & plausibility of AI usage
+2. `creativity` – Originality / novelty of approach
+3. `impact` – Potential real-world value / timeliness
+4. `clarity` – Pitch structure & communicative quality (~50 words target)
+5. `funFactor` – Delight / memorability / wow
 
-Total score is the average of all 10 criteria (rounded, 1–100).
+`totalScore` = rounded average of the 5.
 
-### Prompt Engineering
-- Structured prompts for consistent evaluation
-- JSON response format enforcement
-- Educational feedback generation
-- Optional agentic path: lightweight Google CSE search + context synthesis before Gemini
+### Baseline Prompt
+- Constrained JSON schema (exact keys) to minimize hallucinated fields.
+- Strict parsing & clamping; invalid responses trigger fallback.
+
+### Agentic Augmentation (Primary When Enabled)
+Pipeline (within `agent_service`):
+1. Heuristic token extraction & domain inference (no extra LLM calls).
+2. Diversified query generation (market, competitors, feasibility, regulation, adoption).
+3. Fan-out Google CSE searches (small `num` per query) → merge & score for diversity.
+4. Select & fetch top pages; lightweight heuristic content summarization (HTML trimmed & sentence filtered).
+5. Assemble `context_bundle` JSON array (titles, snippets, excerpts) injected into system prompt.
+6. Gemini reasoning phase (ANALYSIS) then strict JSON emission (JSON_RESPONSE). Parsing strips analysis.
+7. Failures at any stage silently degrade to baseline path.
+
+### Fallback Strategy (Priority Order)
+1. Agentic evaluation (if CSE keys present)
+2. Baseline Gemini evaluation
+3. Synthetic deterministic scoring (length-informed) with clearly labeled feedback
+
+This guarantees a timely structured response under quota or network failures.
 
 ## 🚢 Deployment
 
@@ -204,10 +215,13 @@ CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 # Health check
 curl http://localhost:8000/health
 
-# Submit idea (POST request with JSON body)
-curl -X POST http://localhost:8000/ideas/submit \
+# Submit idea (async) – returns jobId
+curl -X POST http://localhost:8000/ideas/submit_async \
   -H "Content-Type: application/json" \
-  -d '{"uid":"test","name":"Test User","branch":"CSE","rollNumber":"TEST001","idea":"A revolutionary app that solves world hunger using AI and blockchain technology..."}'
+  -d '{"uid":"test","name":"Test User","branch":"CSE","rollNumber":"TEST001","idea":"An AI tool that helps small farmers optimize irrigation using satellite + sensor data... (>=50 words)"}'
+
+# Poll status until completed
+curl http://localhost:8000/ideas/status/<jobId>
 
 # Get leaderboard
 curl http://localhost:8000/leaderboard

@@ -1,12 +1,13 @@
-# MindForge Frontend
+# MindForge Frontend 🔥
 
-React + Vite + Tailwind CSS SPA for the MindForge event. Molten-forge themed dark interface with AI-tempered scoring, live leaderboard, and Google Sign-In.
+React + Vite + Tailwind single‑page interface for the MindForge event. Molten forge aesthetic (embers + obsidian), AI‑tempered rubric scoring, async submission queue, live leaderboard polling, and Google Sign‑In.
 
 ## Tech Stack
 - React 19 + Vite
-- Tailwind CSS 3
-- Firebase Web SDK (Auth only; leaderboard via backend to Firestore)
+- Tailwind CSS 3 (utility-first molten theme)
+- Firebase Web SDK (Auth only; no direct Firestore writes)
 - Lucide Icons
+- Async API → FastAPI queue → Gemini 2.5 Flash
 
 ## Quick Start
 
@@ -38,42 +39,58 @@ VITE_API_BASE_URL=http://localhost:8000
 - `npm run build` – production build
 - `npm run preview` – preview built app
 
-## Project Structure
+## Project Structure (Key Files)
 ```
 frontend/
 ├─ index.html
 ├─ src/
 │  ├─ App.jsx
-│  ├─ index.css
 │  ├─ firebase_config.js
-│  └─ components/
-│     ├─ Navbar.jsx
-│     ├─ Login.jsx
-│     ├─ UserProfileSetup.jsx
-│     ├─ EventInfo.jsx
-│     ├─ IdeaSubmissionForm.jsx
-│     ├─ FeedbackCard.jsx
-│     └─ Leaderboard.jsx
-├─ public/
-│  ├─ RVCE_Logo_With_Text.png
-│  └─ CCLogo_BG_Removed.png
+│  ├─ components/
+│  │  ├─ Navbar.jsx
+│  │  ├─ AIFunFactBar.jsx   # Rotating AI fact ticker
+│  │  ├─ Login.jsx
+│  │  ├─ UserProfileSetup.jsx
+│  │  ├─ EventInfo.jsx
+│  │  ├─ IdeaSubmissionForm.jsx
+│  │  ├─ FeedbackCard.jsx   # Displays 5 criteria + feedback
+│  │  └─ Leaderboard.jsx
+│  └─ utils/
+│     ├─ api.js             # Wrapper for backend calls (async status polling)
+│     ├─ auth.js            # Firebase auth helpers
+│     └─ storage.js         # Local persistence (feedback cache)
 ├─ tailwind.config.js
 ├─ postcss.config.js
 └─ vite.config.js
 ```
 
 ## Design Notes
-- Dark navy palette via Tailwind theme (`dark` and `navy` scales)
-- Centered sections with decorative grid and radial glows
-- Cards use subtle borders and shadows (`card-glow` helper)
+- Molten / forge motif: ember gradients, subtle orange edge glows, low-noise backgrounds
+- Sticky translucent navbar + rotating AI fact bar for engagement
+- Panelized layout: submission, feedback, leaderboard stacked on mobile → multi-column progressively
+- Accessibility: high contrast palette; minimal reliance on color alone (score labels)
+- Smooth micro animations (opacity / glow pulses) kept lightweight for mobile GPUs
 
-## Firebase
-- Auth: Google Sign-In
-- Leaderboard: served by backend from Firestore (client polls every ~5s; can move to SSE later)
+## Data & Evaluation Model
+- 5 rubric dimensions: aiRelevance, creativity, impact, clarity, funFactor (0–100 integers)
+- `totalScore` computed server-side (average, rounded)
+- Private detailed evaluation pulled once after completion and cached locally
+- Public leaderboard shows only name, branch, totalScore
+- Optional backend agentic enrichment: if server has Google CSE credentials, it performs lightweight multi-query web search + snippet summarization before scoring (transparent to client).
+
+## Submission Flow (Async)
+1. User submits idea → POST `/ideas/submit_async`
+2. Receive `{ jobId, status: "queued" }`
+3. Poll `/ideas/status/{jobId}` until `status: completed`
+4. Display structured scores + feedback; persist to localStorage
+5. Leaderboard polling fetches updated ranking list
 
 ## Troubleshooting
-- If Tailwind classes like `bg-dark-800` don’t work, ensure Tailwind is set up with `tailwindcss` in `postcss.config.js` and run a fresh dev server.
-- For image sizing, prefer the `Logo` component to preserve aspect ratios.
+- Missing glow styles? Ensure dev server restarted after Tailwind config edits.
+- Scores not appearing? Check polling network calls; confirm backend job `status` is `completed`.
+- Fallback evaluation? UI will mark if AI wasn't available (still valid structure).
+- Grounded vs baseline scoring? If agentic mode active server-side you'll implicitly benefit—no client changes required.
+- Auth popup blocked? Allow popups for localhost:5173.
 
 ## Deployment
 - Recommended: Vercel
