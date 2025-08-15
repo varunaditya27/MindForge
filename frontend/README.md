@@ -1,6 +1,6 @@
-# IdeaArena Frontend
+# MindForge Frontend
 
-React + Vite + Tailwind CSS SPA for the IdeaArena event. Mobile-first, dark navy theme with backend-powered live leaderboard and Google Sign-In.
+React + Vite + Tailwind CSS SPA for the MindForge event. Molten-forge themed dark interface with AI-tempered scoring, live leaderboard, and Google Sign-In.
 
 ## Tech Stack
 - React 19 + Vite
