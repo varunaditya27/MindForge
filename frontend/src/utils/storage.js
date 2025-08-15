@@ -1,9 +1,27 @@
 // Base keys; we namespace them per user using `${base}:${userKey}`
 const BASE_KEYS = {
-  FEEDBACK: 'ideaArenaFeedback',
-  SCORES: 'ideaArenaScores',
-  USER_PROFILE: 'ideaArenaUserProfile',
-  SUBMISSION_TIME: 'ideaArenaSubmissionTime'
+  FEEDBACK: 'mindForgeFeedback',
+  SCORES: 'mindForgeScores',
+  USER_PROFILE: 'mindForgeUserProfile',
+  SUBMISSION_TIME: 'mindForgeSubmissionTime'
+};
+
+// One-time migration from old IdeaArena keys -> MindForge keys
+export const migrateLegacyKeys = (userKey) => {
+  try {
+    const legacy = {
+      feedback: localStorage.getItem(`ideaArenaFeedback:${normalizeKey(userKey)}`),
+      scores: localStorage.getItem(`ideaArenaScores:${normalizeKey(userKey)}`),
+      profile: localStorage.getItem(`ideaArenaUserProfile:${normalizeKey(userKey)}`),
+      submittedAt: localStorage.getItem(`ideaArenaSubmissionTime:${normalizeKey(userKey)}`)
+    };
+    if (legacy.feedback) localStorage.setItem(k(BASE_KEYS.FEEDBACK, userKey), legacy.feedback);
+    if (legacy.scores) localStorage.setItem(k(BASE_KEYS.SCORES, userKey), legacy.scores);
+    if (legacy.profile) localStorage.setItem(k(BASE_KEYS.USER_PROFILE, userKey), legacy.profile);
+    if (legacy.submittedAt) localStorage.setItem(k(BASE_KEYS.SUBMISSION_TIME, userKey), legacy.submittedAt);
+  } catch (e) {
+    console.warn('Legacy key migration failed', e);
+  }
 };
 
 const normalizeKey = (userKey) => {

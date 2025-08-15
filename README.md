@@ -1,4 +1,4 @@
-# IdeaArena 🚀
+# MindForge �
 
 AI-powered idea evaluation platform for RVCE coding events. Submit your business ideas and get instant feedback from Gemini AI with live leaderboards!
 
@@ -132,4 +132,4 @@ FIREBASE_SERVICE_ACCOUNT_KEY=./firebase_admin_sdk.json
 
 ---
 
-**Ready to innovate?** Submit your ideas at IdeaArena! 🎯
+**Ready to temper innovation?** Submit your ideas at MindForge! 🔥

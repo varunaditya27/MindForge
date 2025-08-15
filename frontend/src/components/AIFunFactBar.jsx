@@ -22,12 +22,16 @@ const AIFunFactBar = () => {
   }, []);
 
   return (
-    <div className="sticky top-0 z-30">
+    <div className="sticky top-0 z-40">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mt-4 rounded-xl bg-navy-900/40 border border-navy-800 backdrop-blur-md p-3 overflow-hidden">
-          <div className="text-sm text-navy-200 transition-all duration-700 ease-in-out">
-            <span className="font-semibold text-navy-300 mr-2">AI Fun Fact:</span>
-            <span key={index}>{FACTS[index]}</span>
+        <div className="mt-4 relative rounded-xl overflow-hidden backdrop-blur-md border border-[#3a2516] bg-gradient-to-r from-[#140a06]/85 via-[#1b0f0a]/90 to-[#140804]/85 shadow-[0_0_18px_-6px_rgba(255,107,0,0.35)]">
+          <div className="absolute inset-0 pointer-events-none opacity-40 bg-[linear-gradient(110deg,rgba(255,128,48,0.25),rgba(255,159,64,0)_50%)]" />
+          <div className="relative px-4 py-3 text-sm flex items-center gap-3">
+            <span className="font-display text-[13px] font-semibold bg-clip-text text-transparent heading-gradient tracking-wide whitespace-nowrap">Forge Fact</span>
+            <span key={index} className="text-soft transition-opacity duration-700 ease-in-out inline-block">
+              {FACTS[index]}
+            </span>
+            <span className="ml-auto w-2 h-2 rounded-full bg-[#ff9f40] animate-pulse shadow-[0_0_6px_2px_rgba(255,159,64,0.6)]" />
           </div>
         </div>
       </div>

@@ -23,8 +23,160 @@
 
 /* Gradient text utility for headings */
 .heading-gradient {
-  background: linear-gradient(90deg, #7aa2ff 0%, #5271ff 50%, #80c7ff 100%);
+  background: linear-gradient(92deg,#ff8030 0%,#ff9f40 40%,#ffc87a 70%,#ffe9c9 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
+
+/* Subtle body text refinement */
+body { font-feature-settings: "liga" on, "calt" on; }
+
+.metric-mono { font-family:'JetBrains Mono',monospace; letter-spacing:-0.5px; }
+
+/* Refined text palette utilities */
+.text-soft { color:#f4e7df; }
+.text-accent { color:#ff9f40; }
+.text-muted { color:#c48e6c; }
+.text-faint { color:#a87454; }
+
+
+/* Temperature gauge bar (can be applied dynamically) */
+.temp-gauge-track { background: linear-gradient(to right, #1f2937, #0f172a); }
+.temp-gauge-fill { background: linear-gradient(90deg, #402108, #ff6b00, #ffd8a8); box-shadow: 0 0 8px rgba(255,107,0,0.6), 0 0 16px rgba(255,154,60,0.4); }
+
+/* Molten card surface */
+.molten-card {
+  background: radial-gradient(circle at 30% 20%, rgba(255,107,0,0.12), transparent 60%),
+              linear-gradient(145deg, rgba(25,17,11,0.9), rgba(8,6,5,0.95));
+  position: relative;
+}
+.molten-card:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(120deg, rgba(255,140,64,0.12), rgba(255,140,64,0) 40%);
+  mix-blend-mode: screen;
+}
+
+/* Heat shimmer overlay */
+.heat-shimmer {
+  position: relative;
+}
+.heat-shimmer:after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0; top: -4px; height: 50%;
+  background: repeating-linear-gradient( to bottom, rgba(255,180,120,0.08) 0%, rgba(255,140,64,0) 8% );
+  filter: blur(6px);
+  opacity: 0.5;
+  animation: shimmer 5s linear infinite;
+  pointer-events: none;
+}
+@keyframes shimmer {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(30px); }
+}
+
+
+/* Animated molten gauge (applied to width transitions) */
+.gauge-track { height: 0.75rem; border-radius: 9999px; overflow: hidden; position: relative; background: linear-gradient(90deg,#1a120d,#0f0a07); }
+.gauge-fill {
+  height: 100%;
+  background: linear-gradient(90deg,#42240b,#ff6b00,#ff9a3c,#ffe0c0);
+  background-size: 200% 100%;
+  animation: flow 6s linear infinite;
+  box-shadow: 0 0 6px rgba(255,107,0,0.6), 0 0 12px rgba(255,140,64,0.4);
+}
+@keyframes flow {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+/* Hammer strike button */
+.hammer-btn { position: relative; overflow: hidden; }
+.hammer-btn:active { transform: translateY(2px) scale(0.97); }
+.hammer-btn:before {
+  content: "";
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(255,140,64,0.35), rgba(255,140,64,0) 60%);
+  opacity: 0; transition: opacity .4s ease;
+}
+.hammer-btn:hover:before { opacity: 1; }
+
+
+/* Focus ring utility (applied via class focus-ring) */
+.focus-ring:focus-visible {
+  outline: 2px solid #ff8a3c;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(255,107,0,0.25);
+  border-radius: 0.5rem;
+}
+
+/* Visually hidden (screen-reader only) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Subtle tilt card effect */
+.tilt-card { transition: transform .5s cubic-bezier(.19,1,.22,1), box-shadow .4s; }
+.tilt-card:hover { transform: translateY(-4px) rotate3d(1,1,0,3deg); box-shadow: 0 14px 30px -10px rgba(255,107,0,0.25); }
+.tilt-card:focus-visible { box-shadow: 0 0 0 3px rgba(255,107,0,0.4); }
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .gauge-fill, .heat-shimmer:after { animation: none !important; }
+  .hammer-btn:active { transform: none; }
+  .tilt-card:hover { transform: none; }
+  .loading-dots div { animation: none !important; }
+}
+
+/* Loading dots (if not already defined elsewhere) */
+.loading-dots { display: inline-flex; gap: 4px; }
+.loading-dots div { width: 6px; height: 6px; background: #ff9a3c; border-radius: 50%; animation: pulse 1s ease-in-out infinite; }
+.loading-dots div:nth-child(2) { animation-delay: .15s; }
+.loading-dots div:nth-child(3) { animation-delay: .3s; }
+.loading-dots div:nth-child(4) { animation-delay: .45s; }
+@keyframes pulse { 0%,100% { transform: scale(.5); opacity:.4;} 50% { transform: scale(1); opacity:1;} }
+
+/* Rank shift highlight */
+.rank-shift {
+  animation: rankShift 1.8s ease-in-out;
+}
+@keyframes rankShift {
+  0% { background-color: rgba(255,107,0,0.35); }
+  40% { background-color: rgba(255,154,60,0.25); }
+  100% { background-color: transparent; }
+}
+
+/* Copy feedback button */
+.copy-btn {
+  position: relative;
+  background: linear-gradient(135deg,#2a160e,#3a1d12);
+  border: 1px solid #3a2516;
+  color: #ffb38a;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.65rem;
+  font-size: 0.75rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: background .3s, color .3s, box-shadow .3s;
+}
+.copy-btn:hover { background: linear-gradient(135deg,#3a1d12,#4a2315); color:#ffd8b8; }
+.copy-btn:active { transform: translateY(1px); }
+.copy-btn.copied { box-shadow: 0 0 0 1px #ff6b00,0 0 14px -4px rgba(255,107,0,.6); color:#ffe0c7; }
+
+/* Effects toggle pill */
+.effects-toggle { background: linear-gradient(135deg,#2a120b,#1a0a06); border:1px solid #3a2516; color:#ff9a3c; }
+.effects-toggle:hover { background: linear-gradient(135deg,#3a160c,#291008); }

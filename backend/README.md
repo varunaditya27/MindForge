@@ -1,4 +1,4 @@
-# IdeaArena Backend 🚀
+# MindForge Backend �
 
 FastAPI backend service for AI-powered idea evaluation platform.
 

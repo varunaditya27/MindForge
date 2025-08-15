@@ -109,16 +109,19 @@ const IdeaSubmissionForm = ({ userProfile, onSubmissionSuccess }) => {
     return (
       <section className="py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-2xl mx-auto">
-          <div className="bg-green-500/10 border border-green-500/20 rounded-2xl p-8 text-center">
-            <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <CheckCircle className="w-8 h-8 text-green-400" />
+          <div className="relative overflow-hidden molten-card rounded-2xl p-10 border border-[#3a2516] shadow-[0_0_24px_-6px_rgba(255,107,0,0.5)]">
+            <div className="absolute -inset-1 rounded-[inherit] opacity-30 bg-[radial-gradient(circle_at_30%_20%,rgba(255,120,20,0.35),transparent_60%)] blur-xl" />
+            <div className="relative text-center">
+              <div className="w-20 h-20 bg-gradient-to-br from-[#1d120c] to-[#2c170e] border border-[#ff6b00]/20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_18px_-4px_rgba(255,107,0,0.4)]">
+                <CheckCircle className="w-10 h-10 text-[#ff9a3c] drop-shadow-[0_0_6px_rgba(255,154,60,0.5)]" />
+              </div>
+              <h3 className="font-display text-3xl font-semibold heading-gradient mb-3 tracking-wide">
+                Alloy Tempered Successfully!
+              </h3>
+              <p className="text-[#f7d9c6]/80 leading-relaxed">
+                Your concept has passed through the forge. Explore the molten feedback below and watch your rank in the Hall of Masterpieces.
+              </p>
             </div>
-            <h3 className="text-2xl font-semibold text-white mb-2">
-              Idea Submitted Successfully!
-            </h3>
-            <p className="text-gray-300">
-              Your idea has been evaluated by AI. Check your feedback below and see how you rank on the leaderboard!
-            </p>
           </div>
         </div>
       </section>
@@ -126,24 +129,27 @@ const IdeaSubmissionForm = ({ userProfile, onSubmissionSuccess }) => {
   }
 
   return (
-    <section className="py-12 px-4 sm:px-6 lg:px-8" id="submit">
+  <section className="py-12 px-4 sm:px-6 lg:px-8" id="submit" aria-labelledby="submit-title">
       <div className="max-w-2xl mx-auto">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-navy-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Lightbulb className="w-8 h-8 text-navy-400" />
+        <div className="text-center mb-10 relative">
+          <div className="w-20 h-20 bg-gradient-to-br from-[#20120c] to-[#2d170f] border border-[#3a2516] rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-[0_0_14px_-2px_rgba(255,107,0,0.4)]">
+            <Lightbulb className="w-9 h-9 text-[#ff9a3c] drop-shadow-[0_0_6px_rgba(255,154,60,0.6)]" />
           </div>
-          <h2 className="text-3xl font-bold text-white mb-2 heading-gradient">
-            Submit Your Idea
+          <h2 id="submit-title" className="font-display text-3xl font-semibold mb-3 heading-gradient tracking-wide">
+            Submit Your Alloy
           </h2>
-          <p className="text-gray-400">
-            Share your innovative business idea and get instant AI feedback
+          <p className="text-[#ffb38a]/70 max-w-xl mx-auto text-sm">
+            Pour your raw concept into the crucible. The forge will temper, score and reflect its potential.
           </p>
         </div>
 
-        <div className="bg-dark-800/50 backdrop-blur-sm rounded-2xl p-8 border border-navy-800 card-glow">
+  <div className="molten-card backdrop-blur-md rounded-2xl p-8 border border-[#3a2516] shadow-[0_0_22px_-6px_rgba(255,107,0,0.45)] relative overflow-hidden tilt-card" aria-describedby="forge-tips">
+          <div className="absolute -top-40 -left-32 w-96 h-96 bg-[radial-gradient(circle_at_center,rgba(255,107,0,0.22),transparent_65%)] blur-2xl" />
+          <div className="absolute -bottom-40 -right-20 w-72 h-72 bg-[radial-gradient(circle_at_center,rgba(255,154,60,0.18),transparent_60%)] blur-2xl" />
+          <div className="relative">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* User Info Display */}
-            <div className="bg-dark-700/50 rounded-xl p-4">
+            <div className="rounded-xl p-4 bg-[#1d120c]/70 border border-[#3a2516]">
               <div className="flex items-center justify-between">
                 <div>
                   <h4 className="font-medium text-white">{userProfile.name}</h4>
@@ -156,17 +162,17 @@ const IdeaSubmissionForm = ({ userProfile, onSubmissionSuccess }) => {
 
             {/* Idea Input */}
             <div>
-              <label htmlFor="idea" className="block text-sm font-medium text-gray-300 mb-2">
-                Your Business Idea
+              <label htmlFor="idea" className="block text-sm font-semibold tracking-wide text-[#ffb38a] mb-2">
+                Your Concept Alloy
               </label>
               <textarea
                 id="idea"
                 value={idea}
                 onChange={(e) => setIdea(e.target.value)}
-                placeholder="Describe your innovative business idea in detail. What problem does it solve? Who is your target audience? What makes it unique? How would you implement it?"
+                placeholder="Cast your vision... What problem are you shaping? Who will wield it? What ignites its spark? How will you forge it into reality?"
                 rows={10}
                 maxLength={maxCharacters}
-                className="w-full bg-dark-700 border border-navy-700 rounded-xl px-4 py-4 text-white placeholder-gray-500 focus:ring-2 focus:ring-navy-500 focus:border-transparent transition-all duration-200 resize-none shadow-inner"
+                className="w-full bg-[#120b07] border border-[#2c1b11] focus:border-[#ff6b00]/40 focus:ring-2 focus:ring-[#ff6b00]/30 rounded-xl px-4 py-4 text-white placeholder-[#845640] focus:placeholder-[#ff9a3c] transition-all duration-300 resize-none shadow-inner"
                 required
               />
               
@@ -174,17 +180,17 @@ const IdeaSubmissionForm = ({ userProfile, onSubmissionSuccess }) => {
               <div className="flex justify-between items-center mt-2">
                 <div className="flex items-center space-x-2">
                   {characterCount < minCharacters ? (
-                    <span className="text-xs text-red-400">
+                    <span className="text-xs text-[#ff5e42] tracking-wide">
                       Minimum {minCharacters} characters required
                     </span>
                   ) : (
-                    <span className="text-xs text-green-400">
-                      Great! Your idea is detailed enough
+                    <span className="text-xs text-[#ffc48a]">
+                      Alloy density sufficient
                     </span>
                   )}
                 </div>
                 <span className={`text-xs ${
-                  characterCount > maxCharacters * 0.9 ? 'text-red-400' : 'text-gray-500'
+                  characterCount > maxCharacters * 0.9 ? 'text-[#ff5e42]' : 'text-[#a87454]'
                 }`}>
                   {characterCount}/{maxCharacters}
                 </span>
@@ -193,9 +199,9 @@ const IdeaSubmissionForm = ({ userProfile, onSubmissionSuccess }) => {
 
             {/* Error Message */}
             {error && (
-              <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center space-x-2">
-                <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0" />
-                <p className="text-red-400 text-sm">{error}</p>
+              <div className="p-4 bg-[#3a0f0f]/60 border border-red-700/40 rounded-lg flex items-center space-x-2">
+                <AlertCircle className="w-5 h-5 text-[#ff5e42] flex-shrink-0" />
+                <p className="text-[#ff8a73] text-sm">{error}</p>
               </div>
             )}
 
@@ -203,7 +209,7 @@ const IdeaSubmissionForm = ({ userProfile, onSubmissionSuccess }) => {
             <button
               type="submit"
               disabled={isSubmitting || characterCount < minCharacters || characterCount > maxCharacters}
-              className="w-full bg-gradient-to-r from-navy-600 to-navy-500 hover:from-navy-500 hover:to-navy-400 text-white font-medium py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-navy-900/30"
+              className="hammer-btn focus-ring w-full bg-gradient-to-br from-[#ff6200] via-[#ff4d00] to-[#ffb347] hover:from-[#ff751a] hover:via-[#ff560a] hover:to-[#ffc27a] text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_-4px_rgba(255,107,0,0.5)]"
             >
               {isSubmitting ? (
                 <>
@@ -218,32 +224,33 @@ const IdeaSubmissionForm = ({ userProfile, onSubmissionSuccess }) => {
               ) : (
                 <>
                   <Send className="w-5 h-5" />
-                  <span>Submit for AI Evaluation</span>
+                  <span>Strike the Hammer</span>
                 </>
               )}
             </button>
             {isSubmitting && (
-              <div className="mt-4 flex flex-col items-center justify-center text-navy-300 text-sm animate-pulse space-y-1">
+              <div className="mt-4 flex flex-col items-center justify-center text-[#ffb38a] text-sm animate-pulse space-y-1">
                 <div className="flex items-center space-x-2">
-                  <span className="mr-1">🤖</span>
+                  <span className="mr-1">🔥</span>
                   <span>{progressMsg}</span>
                 </div>
-                {jobId && <span className="text-xs text-navy-400/70">Job ID: {jobId.slice(0,8)}…</span>}
+                {jobId && <span className="text-xs text-[#ff9a3c]/60">Job ID: {jobId.slice(0,8)}…</span>}
               </div>
             )}
           </form>
 
           {/* Tips */}
-          <div className="mt-6 p-4 bg-navy-900/30 rounded-xl border border-navy-700 card-glow">
-            <h4 className="font-medium text-white mb-2">💡 Tips for a Great Submission:</h4>
-            <ul className="text-sm text-gray-400 space-y-1">
-              <li>• Be specific about the problem you're solving</li>
-              <li>• Explain your target audience clearly</li>
-              <li>• Describe what makes your idea unique</li>
-              <li>• Include your implementation strategy</li>
-              <li>• Consider the market potential and scalability</li>
+          <div id="forge-tips" className="mt-8 p-5 rounded-xl border border-[#3a2516] bg-[#140c08]/70" aria-live="polite">
+            <h4 className="font-semibold text-[#ffb38a] mb-3 tracking-wide text-sm">Forge Tempering Tips</h4>
+            <ul className="text-xs text-[#c48e6c] space-y-1 leading-relaxed">
+              <li>• Define the core problem with sharp clarity</li>
+              <li>• State who benefits and why they burn for it</li>
+              <li>• Surface what makes your alloy distinct</li>
+              <li>• Outline initial shaping & scaling steps</li>
+              <li>• Hint at market pull & sustainability</li>
             </ul>
           </div>
+        </div>
         </div>
       </div>
     </section>

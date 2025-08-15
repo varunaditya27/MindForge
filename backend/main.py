@@ -28,7 +28,7 @@ async def lifespan(app: FastAPI):
         await evaluation_queue.stop()
     except Exception:
         pass
-    logger.info("Shutting down IdeaArena API")
+    logger.info("Shutting down MindForge API")
 
 # Initialize FastAPI app with lifespan to avoid deprecated on_event
 app = FastAPI(
