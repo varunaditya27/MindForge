@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { Trophy, Medal, Award, Users, Crown, TrendingUp } from 'lucide-react';
 import { getLeaderboard } from '../utils/api';
@@ -7,6 +7,7 @@ const Leaderboard = ({ currentUser, onEnterTop3 }) => {
   const [leaderboardData, setLeaderboardData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const previousRanksRef = useRef({});
 
   useEffect(() => {
     let timerId;
@@ -14,13 +15,13 @@ const Leaderboard = ({ currentUser, onEnterTop3 }) => {
     const fetchData = async () => {
       const result = await getLeaderboard();
       if (result.success && Array.isArray(result.data)) {
-        setLeaderboardData(result.data);
+  setLeaderboardData(result.data);
         setError(null);
       } else if (result.success && result.data && typeof result.data === 'object') {
         // In case backend returns an object map
         const arr = Object.entries(result.data).map(([uid, userData]) => ({ uid, ...userData }))
           .sort((a, b) => b.score - a.score);
-  setLeaderboardData(arr);
+        setLeaderboardData(arr);
         setError(null);
       } else {
         setError(result.error || 'Error loading leaderboard');
@@ -114,53 +115,53 @@ const Leaderboard = ({ currentUser, onEnterTop3 }) => {
   }
 
   return (
-    <section className="py-12 px-4 sm:px-6 lg:px-8" id="leaderboard">
+  <section className="py-12 px-4 sm:px-6 lg:px-8" id="leaderboard" aria-labelledby="leaderboard-title">
       <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-navy-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Trophy className="w-8 h-8 text-navy-400" />
+        <div className="text-center mb-10 relative">
+          <div className="w-20 h-20 bg-gradient-to-br from-[#20120c] to-[#2d170f] border border-[#3a2516] rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-[0_0_16px_-4px_rgba(255,107,0,0.4)]">
+            <Trophy className="w-9 h-9 text-[#ff9a3c] drop-shadow-[0_0_6px_rgba(255,154,60,0.6)]" />
           </div>
-          <h2 className="text-3xl font-bold text-white mb-2 heading-gradient">
-            Live Leaderboard
+          <h2 id="leaderboard-title" className="font-display text-3xl font-semibold mb-3 heading-gradient tracking-wide">
+            Hall of Masterpieces
           </h2>
-          <p className="text-gray-400">
-            See how you rank against other participants
+          <p className="text-[#ffb38a]/70 max-w-xl mx-auto text-sm">
+            Witness molten concepts rising through the forge.
           </p>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          <div className="bg-dark-800/50 backdrop-blur-sm rounded-xl p-6 border border-navy-800 text-center card-glow">
+          <div className="molten-card backdrop-blur-md rounded-xl p-6 border border-[#3a2516] text-center shadow-[0_0_18px_-6px_rgba(255,107,0,0.4)]">
             <div className="flex items-center justify-center space-x-2 mb-2">
-              <Users className="w-5 h-5 text-navy-400" />
+              <Users className="w-5 h-5 text-[#ff9a3c]" />
               <span className="text-2xl font-bold text-white">{leaderboardData.length}</span>
             </div>
-            <p className="text-sm text-gray-400">Total Participants</p>
+            <p className="text-xs text-[#c48e6c] tracking-wide uppercase">Participants</p>
           </div>
           
           {currentUserRank > 0 && (
-            <div className="bg-dark-800/50 backdrop-blur-sm rounded-xl p-6 border border-navy-800 text-center card-glow">
+            <div className="molten-card backdrop-blur-md rounded-xl p-6 border border-[#3a2516] text-center shadow-[0_0_18px_-6px_rgba(255,107,0,0.4)]">
               <div className="flex items-center justify-center space-x-2 mb-2">
-                <TrendingUp className="w-5 h-5 text-navy-400" />
-                <span className="text-2xl font-bold text-white">#{currentUserRank}</span>
+                <TrendingUp className="w-5 h-5 text-[#ff9a3c]" />
+                <span className="metric-mono text-2xl font-bold text-white">#{currentUserRank}</span>
               </div>
-              <p className="text-sm text-gray-400">Your Rank</p>
+              <p className="text-xs text-[#c48e6c] tracking-wide uppercase">Your Rank</p>
             </div>
           )}
 
           {leaderboardData.length > 0 && (
-            <div className="bg-dark-800/50 backdrop-blur-sm rounded-xl p-6 border border-navy-800 text-center card-glow">
+            <div className="molten-card backdrop-blur-md rounded-xl p-6 border border-[#3a2516] text-center shadow-[0_0_18px_-6px_rgba(255,107,0,0.4)]">
               <div className="flex items-center justify-center space-x-2 mb-2">
                 <Crown className="w-5 h-5 text-yellow-400" />
-                <span className="text-2xl font-bold text-white">{leaderboardData[0]?.score || 0}</span>
+                <span className="metric-mono text-2xl font-bold text-white">{leaderboardData[0]?.score || 0}</span>
               </div>
-              <p className="text-sm text-gray-400">Top Score</p>
+              <p className="text-xs text-[#c48e6c] tracking-wide uppercase">Top Alloy</p>
             </div>
           )}
         </div>
 
         {/* Leaderboard */}
-  <div className="bg-dark-800/50 backdrop-blur-sm rounded-2xl border border-navy-800 overflow-hidden card-glow">
+  <div className="molten-card backdrop-blur-md rounded-2xl border border-[#3a2516] overflow-hidden shadow-[0_0_26px_-8px_rgba(255,107,0,0.45)]" aria-label="Leaderboard rankings">
           {leaderboardData.length === 0 ? (
             <div className="p-8 text-center">
               <Trophy className="w-12 h-12 text-gray-600 mx-auto mb-4" />
@@ -172,31 +173,37 @@ const Leaderboard = ({ currentUser, onEnterTop3 }) => {
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-navy-800">
+            <div className="divide-y divide-[#2c1b11]">
               {leaderboardData.map((entry, index) => {
                 const rank = index + 1;
                 const isCurrentUser = entry.uid === currentUser?.uid;
+                const prevRank = previousRanksRef.current[entry.uid];
+                if (prevRank !== rank) {
+                  previousRanksRef.current[entry.uid] = rank;
+                }
+                const rankShift = prevRank && prevRank !== rank;
                 
                 return (
                   <div
                     key={entry.uid}
-                    className={`p-6 transition-all duration-200 ${
-                      isCurrentUser ? 'bg-navy-500/10 border-l-4 border-navy-500' : ''
-                    } ${getRankBg(rank)}`}
+                    className={`p-6 transition-all duration-300 relative group ${
+                      isCurrentUser ? 'border-l-4 border-[#ff6b00]/70 bg-[#1d120c]/70' : 'hover:bg-[#1a0f0a]/60'
+                    } ${getRankBg(rank)} ${rankShift ? 'rank-shift' : ''} overflow-hidden focus-ring`} aria-label={`Rank ${rank} ${entry.name} score ${entry.score}`}
                   >
-                    <div className="flex items-center justify-between">
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-30 transition-opacity duration-500 bg-[radial-gradient(circle_at_20%_50%,rgba(255,107,0,0.18),transparent_70%)]" />
+                    <div className="flex items-center justify-between relative">
                       <div className="flex items-center space-x-4">
                         {/* Rank */}
-                        <div className="w-12 h-12 flex items-center justify-center">
+                        <div className="w-12 h-12 flex items-center justify-center" aria-hidden="true">
                           {getRankIcon(rank)}
                         </div>
                         
                         {/* User Info */}
                         <div>
-                          <h4 className={`font-semibold ${isCurrentUser ? 'text-navy-300' : 'text-white'}`}>
+              <h4 className={`font-semibold tracking-wide ${isCurrentUser ? 'text-[#ffb38a]' : 'text-white'}`}>
                             {entry.name}
                             {isCurrentUser && (
-                              <span className="ml-2 text-xs bg-navy-500/20 text-navy-400 px-2 py-1 rounded-full">
+                <span className="ml-2 text-[10px] bg-[#311e13] border border-[#ff6b00]/30 text-[#ff9a3c] px-2 py-1 rounded-full uppercase tracking-wide">
                                 You
                               </span>
                             )}
@@ -208,13 +215,11 @@ const Leaderboard = ({ currentUser, onEnterTop3 }) => {
                       </div>
                       
                       {/* Score */}
-                      <div className="text-right">
-                        <div className={`text-2xl font-bold ${getScoreColor(entry.score)}`}>
+                      <div className="text-right"> 
+                        <div className={`metric-mono text-2xl font-bold ${getScoreColor(entry.score)}`}>
                           {entry.score}
                         </div>
-                        <div className="text-xs text-gray-500">
-                          / 100 points
-                        </div>
+                        <div className="text-[10px] text-[#a87454] tracking-wide uppercase">/100</div>
                       </div>
                     </div>
                   </div>
@@ -226,8 +231,8 @@ const Leaderboard = ({ currentUser, onEnterTop3 }) => {
 
         {/* Update Info */}
         <div className="mt-6 text-center">
-          <p className="text-xs text-gray-500">
-            🔄 Leaderboard auto-refreshes every few seconds as new ideas are submitted
+          <p className="text-[10px] text-[#e6cbb9]/50 tracking-wide uppercase">
+            🔄 Auto-refreshing every few seconds as alloys are tempered
           </p>
         </div>
       </div>
