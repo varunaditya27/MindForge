@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Globe, AlertCircle } from 'lucide-react';
 import { signInWithGoogle } from '../utils/auth';
-import Logo from './Logo';
+import Logo from './LogoFooter';
 
 const Login = ({ onLoginSuccess }) => {
   const [isLoading, setIsLoading] = useState(false);

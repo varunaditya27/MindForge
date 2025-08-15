@@ -12,7 +12,7 @@ import EventInfo from './components/EventInfo';
 import IdeaSubmissionForm from './components/IdeaSubmissionForm';
 import FeedbackCard from './components/FeedbackCard';
 import Leaderboard from './components/Leaderboard';
-import Logo from './components/Logo';
+import LogoFooter from './components/LogoFooter';
 import AIFunFactBar from './components/AIFunFactBar';
 
 function App() {
@@ -147,7 +147,7 @@ function App() {
         <div className="pointer-events-none absolute inset-0 bg-radial"></div>
         <div className="relative text-center px-6">
           <div className="mb-6 flex justify-center">
-            <Logo size="large" />
+            <LogoFooter size="large" />
           </div>
           <div className="loading-dots mb-4">
             <div></div>
@@ -227,7 +227,7 @@ function App() {
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
             <div className="flex flex-col items-center">
               <div className="flex justify-center mb-6">
-                <Logo size="small" opacity="muted" />
+                <LogoFooter size="small" opacity="muted" />
               </div>
               <div className="flex flex-wrap items-center justify-center gap-4 text-[11px] tracking-wide uppercase text-[#a87454] mb-4">
                 <span className="px-3 py-1 rounded-full bg-[#1d120c]/70 border border-[#3a2516]">Forged at RVCE</span>

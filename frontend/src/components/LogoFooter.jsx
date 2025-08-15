@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Logo = ({ size = 'medium', className = '', showSeparator = true, opacity = 'full' }) => {
+const LogoFooter = ({ size = 'medium', className = '', showSeparator = true, opacity = 'full' }) => {
   // Size configurations based on logo dimensions
   const sizeConfig = {
     small: {
@@ -42,4 +42,4 @@ const Logo = ({ size = 'medium', className = '', showSeparator = true, opacity =
   );
 };
 
-export default Logo;
+export default LogoFooter;

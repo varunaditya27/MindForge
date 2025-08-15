@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { LogOut } from 'lucide-react';
 import { logout } from '../utils/auth';
-import Logo from './Logo';
+import LogoNavbar from './LogoNavbar';
 
 const Navbar = ({ user, onSignOut }) => {
   const handleSignOut = async () => {
@@ -18,7 +18,7 @@ const Navbar = ({ user, onSignOut }) => {
         <div className="flex items-center justify-between h-16">
           {/* Logo Section */}
           <div className="flex items-center">
-            <Logo size="medium" />
+            <LogoNavbar size="medium" />
           </div>
 
           {/* Center Title */}
