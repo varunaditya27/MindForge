@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Galdeano&display=swap'); /* Replaced Inter with Galdeano */
 
 /* Theme is defined in tailwind.config.js (Tailwind v3) */
 
@@ -27,6 +27,25 @@
 html {
   scroll-behavior: smooth;
 }
+
+/* Galdeano only provides Regular 400. Enforce consistent rendering and avoid
+   synthetic bold artifacts for general body copy. Headings can still use the
+   display font (Cinzel) via Tailwind's font-display class. */
+body {
+  font-family: 'Galdeano', system-ui, sans-serif;
+  font-weight: 400; /* lock to available weight */
+  font-size: 1.17rem; /* ~17% increase from 16px baseline (18.7px) */
+  line-height: 1.55; /* improve readability with taller x-height */
+  letter-spacing: 0.15px; /* slight tracking to aid legibility at larger size */
+}
+
+/* Maintain comfortable sizing on very small mobile screens to avoid layout breaks */
+@media (max-width: 380px) {
+  body { font-size: 1.08rem; }
+}
+
+/* Optional utility: reduce oversized Galdeano in dense UI regions if needed */
+.text-galdeano-sm { font-size: 0.95em; }
 
 /* Loading animation */
 .loading-dots {

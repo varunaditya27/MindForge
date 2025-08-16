@@ -52,10 +52,10 @@ const EventInfo = () => {
                 <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-5 bg-[#1d120c] border border-[#3a2516] shadow-[0_0_12px_-2px_rgba(255,107,0,0.35)]">
                   <feature.icon className="w-7 h-7 text-[#ff9a3c] drop-shadow-[0_0_6px_rgba(255,154,60,0.6)]" />
                 </div>
-                <h3 className="font-semibold text-white mb-2 tracking-wide">
+                <h3 className="font-semibold text-white mb-2 tracking-wide text-[1.15rem]">
                   {feature.title}
                 </h3>
-                <p className="text-xs text-[#c48e6c] leading-relaxed">
+                <p className="text-sm text-[#c48e6c] leading-relaxed">
                   {feature.description}
                 </p>
               </div>
@@ -68,9 +68,9 @@ const EventInfo = () => {
           <div className="absolute -top-32 -left-20 w-72 h-72 bg-[radial-gradient(circle_at_center,rgba(255,120,20,0.22),transparent_65%)] blur-2xl" />
           <div className="absolute -bottom-36 -right-16 w-80 h-80 bg-[radial-gradient(circle_at_center,rgba(255,154,60,0.18),transparent_65%)] blur-2xl" />
           <div className="relative">
-            <h3 className="text-xl font-semibold mb-5 heading-gradient">Forge Metric System</h3>
-            <p className="text-[#ffb38a]/70 text-sm mb-6">Each metric is tempered 0–100. Total is the alloy average.</p>
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 text-center text-[#c48e6c] text-xs tracking-wide uppercase">
+            <h3 className="font-semibold mb-5 heading-gradient text-[1.44rem]">Forge Metric System</h3>
+            <p className="text-[#ffb38a]/70 text-base mb-6">Each metric is tempered 0–100. Total is the alloy average.</p>
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 text-center text-[#c48e6c] text-sm tracking-wide uppercase">
               <div>Forge Fit</div>
               <div>Spark Factor</div>
               <div>Hammer Blow</div>

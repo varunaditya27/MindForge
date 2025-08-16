@@ -35,7 +35,9 @@ export default {
         }
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+  // Updated default sans stack: Galdeano now primary (replacing Inter)
+  // Keep a fallback chain so weights not supported by Galdeano fall back gracefully.
+  sans: ['Galdeano', 'system-ui', 'sans-serif'],
         display: ['Cinzel', 'serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },
