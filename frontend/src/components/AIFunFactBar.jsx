@@ -54,21 +54,27 @@ const AIFunFactBar = () => {
   }, [index]);
 
   return (
-    <div className="sticky top-0 z-40 w-full">
-      {/* Removed outer max-width + padding to eliminate large left gap. Internal padding tightened. */}
-      <div className="mt-4 relative rounded-xl overflow-hidden backdrop-blur-md border border-[#3a2516] bg-gradient-to-r from-[#140a06]/85 via-[#1b0f0a]/90 to-[#140804]/85 shadow-[0_0_18px_-6px_rgba(255,107,0,0.35)] w-full">
+    <div className="sticky top-0 z-40 w-full px-4 sm:px-6 lg:px-8">
+      <div className="mt-4 relative rounded-xl overflow-hidden backdrop-blur-md border border-[#3a2516] bg-gradient-to-r from-[#140a06]/85 via-[#1b0f0a]/90 to-[#140804]/85 shadow-[0_0_18px_-6px_rgba(255,107,0,0.35)] max-w-7xl mx-auto">
         {/* Subtle moving sheen */}
         <div className="absolute inset-0 pointer-events-none opacity-25 bg-[linear-gradient(110deg,rgba(255,140,40,0.28),rgba(255,159,64,0)_55%)] animate-pulse" />
-        <div className="relative py-2.5 pl-3 pr-4 md:pl-4 md:pr-6 text-sm flex items-center gap-3 select-none">
-          <span className="font-display text-[13px] font-semibold bg-clip-text text-transparent heading-gradient tracking-wide whitespace-nowrap shrink-0">Forge Fact</span>
+        
+        {/* Header with label and indicator */}
+        <div className="relative px-3 pt-2.5 pb-1 flex items-center justify-center select-none">
+          <span className="font-display text-[13px] font-semibold text-[#ff9a3c] tracking-wide">Forge Fact</span>
+          <span className="absolute right-3 w-2 h-2 rounded-full bg-[#ff9f40] animate-pulse shadow-[0_0_6px_2px_rgba(255,159,64,0.6)]" />
+        </div>
+        
+        {/* Full-width text content */}
+        <div className="relative px-3 pb-2.5">
           <span
             key={index}
-            className="text-[#e9d5c7] animate-fade-in will-change-transform inline-block"
+            className="text-[#e9d5c7] animate-fade-in will-change-transform block text-sm leading-relaxed"
           >
             {FACTS[index]}
           </span>
-          <span className="ml-auto w-2 h-2 rounded-full bg-[#ff9f40] animate-pulse shadow-[0_0_6px_2px_rgba(255,159,64,0.6)]" />
         </div>
+        
         {/* Progress bar */}
         <div className="absolute bottom-0 left-0 h-0.5 w-full bg-[#3a2516]/60 overflow-hidden">
           <div
