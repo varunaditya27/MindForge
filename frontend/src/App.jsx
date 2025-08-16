@@ -207,10 +207,10 @@ function App() {
                   <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-6">
                     <div className="flex items-center justify-between">
                       <p className="text-amber-300 font-medium">
-                        You’ve submitted — wait for Round 2.
+                        Alloy Successfully Forged — wait for Round 2.
                       </p>
                       {scores?.totalScore != null && (
-                        <span className="text-amber-200 text-sm">Last score: {scores.totalScore}/100</span>
+                        <span className="text-amber-200 text-sm">Your Alloy Score: {scores.totalScore}/100</span>
                       )}
                     </div>
                   </div>
@@ -233,15 +233,14 @@ function App() {
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
             <div className="flex flex-col items-center">
               <div className="flex justify-center mb-6">
-                <LogoFooter size="small" opacity="muted" />
+                <LogoFooter size="large" opacity="muted" />
               </div>
               <div className="flex flex-wrap items-center justify-center gap-4 text-[11px] tracking-wide uppercase text-[#a87454] mb-4">
                 <span className="px-3 py-1 rounded-full bg-[#1d120c]/70 border border-[#3a2516]">Forged at RVCE</span>
                 <span className="px-3 py-1 rounded-full bg-[#1d120c]/70 border border-[#3a2516]">AI Tempered</span>
-                <span className="px-3 py-1 rounded-full bg-[#1d120c]/70 border border-[#3a2516]">Realtime Rankings</span>
               </div>
               <p className="text-[#e6cbb9]/50 text-[11px] tracking-wide uppercase">
-                © 2025 MindForge • RVCE Coding Club • Alloys of Innovation
+                © 2025 MindForge • RVCE Coding Club
               </p>
             </div>
           </div>
