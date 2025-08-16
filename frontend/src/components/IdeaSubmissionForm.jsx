@@ -162,7 +162,7 @@ const IdeaSubmissionForm = ({ userProfile, onSubmissionSuccess }) => {
 
             {/* Idea Input */}
             <div>
-              <label htmlFor="idea" className="block text-sm font-semibold tracking-wide text-[#ffb38a] mb-2">
+              <label htmlFor="idea" className="block text-sm font-semibold text-[1.44rem] tracking-wide text-[#ffb38a] mb-2">
                 Your Concept Alloy
               </label>
               <textarea
@@ -239,15 +239,25 @@ const IdeaSubmissionForm = ({ userProfile, onSubmissionSuccess }) => {
             )}
           </form>
 
-          {/* Tips */}
+          {/* Forge‑themed scoring guidance */}
           <div id="forge-tips" className="mt-8 p-5 rounded-xl border border-[#3a2516] bg-[#140c08]/70" aria-live="polite">
-            <h4 className="font-semibold text-[#ffb38a] mb-3 tracking-wide text-sm">Forge Tempering Tips</h4>
-            <ul className="text-xs text-[#c48e6c] space-y-1 leading-relaxed">
-              <li>• Define the core problem with sharp clarity</li>
-              <li>• State who benefits and why they burn for it</li>
-              <li>• Surface what makes your alloy distinct</li>
-              <li>• Outline initial shaping & scaling steps</li>
-              <li>• Hint at market pull & sustainability</li>
+            <h4 className="font-semibold text-[#ffb38a] mb-3 tracking-wide text-sm">Tempering Guide (What We Look For)</h4>
+            <ul className="text-xs text-[#c48e6c] space-y-2 leading-relaxed">
+              <li>
+                <span className="text-[#ff9a3c] font-semibold">Forge Fit (AI Relevance):</span> Does your idea actually need AI, or could a simple app do the same job? Think about what kind of AI you’d use (e.g., chatbot, image generator, recommender system) and why it’s the right tool here.
+              </li>
+              <li>
+                <span className="text-[#ff9a3c] font-semibold">Spark Factor (Creativity):</span> Is there a twist or originality in your idea? Maybe you’re combining AI with a field people don’t usually think about (like farming, fitness, or music), or giving a fresh spin to a common app. One clear, unique angle stands out more than vague claims like “revolutionary” or “next-gen.”
+              </li>
+              <li>
+                <span className="text-[#ff9a3c] font-semibold">Hammer Blow (Impact):</span> Who benefits from your idea, and how big is the difference it makes? Show what problem it solves (saving time, reducing costs, improving access, making life easier), and why people would actually care. The bigger and clearer the benefit, the stronger the hammer blow.
+              </li>
+              <li>
+                <span className="text-[#ff9a3c] font-semibold">Sharpness (Clarity):</span> Can you explain your idea in a clean flow without confusing jargon? A good structure is: Problem → Your AI Solution → Who it helps → Why it works → First steps to build it. If your idea can be understood quickly by both techies and non-techies, it scores high on sharpness.
+              </li>
+              <li>
+                <span className="text-[#ff9a3c] font-semibold">Flare (Fun Factor):</span> Does your idea have something that makes it exciting, memorable, or fun? It could be a playful user experience, a gamified element, or just that “wow” moment that makes people smile. Even serious ideas can have a spark that makes them engaging.
+              </li>
             </ul>
           </div>
         </div>
