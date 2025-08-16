@@ -14,6 +14,7 @@ import FeedbackCard from './components/FeedbackCard';
 import Leaderboard from './components/Leaderboard';
 import LogoFooter from './components/LogoFooter';
 import AIFunFactBar from './components/AIFunFactBar';
+import Particles from './components/Particles';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -143,6 +144,7 @@ function App() {
   if (loading) {
     return (
       <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#0b0604]">
+        <Particles />
         {/* Ember gradient washes */}
         <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_30%_40%,rgba(255,107,0,0.18),transparent_60%),radial-gradient(circle_at_70%_65%,rgba(255,159,64,0.14),transparent_65%)]" />
         {/* Subtle forge striations */}
@@ -169,22 +171,31 @@ function App() {
 
   // Show login if no user
   if (!user) {
-    return <Login onLoginSuccess={handleLoginSuccess} />;
+    return (
+      <>
+        <Particles />
+        <Login onLoginSuccess={handleLoginSuccess} />
+      </>
+    );
   }
 
   // Show profile setup if user but profile is missing or incomplete
   if (!userProfile?.branch || !userProfile?.rollNumber) {
     return (
-      <UserProfileSetup 
-        user={user} 
-        onProfileComplete={handleProfileComplete} 
-      />
+      <>
+        <Particles />
+        <UserProfileSetup 
+          user={user} 
+          onProfileComplete={handleProfileComplete} 
+        />
+      </>
     );
   }
 
   // Main application
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-black via-[#0c0705] to-[#120b07] overflow-hidden">
+      <Particles />
       <div className="pointer-events-none absolute inset-0 bg-grid opacity-10"></div>
       <div className="pointer-events-none absolute inset-0 bg-radial"></div>
       <div className="relative">
@@ -207,10 +218,10 @@ function App() {
                   <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-6">
                     <div className="flex items-center justify-between">
                       <p className="text-amber-300 font-medium">
-                        Alloy Successfully Forged — wait for Round 2.
+                        You’ve submitted — wait for Round 2.
                       </p>
                       {scores?.totalScore != null && (
-                        <span className="text-amber-200 text-sm">Your Alloy Score: {scores.totalScore}/100</span>
+                        <span className="text-amber-200 text-sm">Last score: {scores.totalScore}/100</span>
                       )}
                     </div>
                   </div>
