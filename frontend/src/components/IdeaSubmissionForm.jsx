@@ -17,9 +17,8 @@ const IdeaSubmissionForm = ({ userProfile, onSubmissionSuccess }) => {
     'Gathering market signals...',
     'Scanning competitors & feasibility...',
     'Synthesizing context...',
-  'Scoring core dimensions...',
-    'Generating actionable feedback...',
-    'Finalizing JSON response...'
+    'Scoring core dimensions...',
+    'Generating actionable feedback...'
   ]), []);
   // Rotate messages every few seconds while waiting
   useEffect(() => {
