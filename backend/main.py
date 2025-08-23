@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import logging
 from contextlib import asynccontextmanager
 from app.core.config import settings
+from app.routers.chat_router import router as chat_router
 from app.routers import health_router, ideas_router, leaderboard_router, users_router
 from app.services.evaluation_queue import evaluation_queue
 
@@ -57,6 +58,9 @@ app.include_router(health_router)
 app.include_router(ideas_router)
 app.include_router(leaderboard_router)
 app.include_router(users_router)
+app.include_router(chat_router)
+
+
 
 # (Startup/Shutdown handled by lifespan above)
 
